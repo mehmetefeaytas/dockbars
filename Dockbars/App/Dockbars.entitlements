@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  App Sandbox is intentionally disabled: global mouse monitoring and reading the
+	  Dock's configuration require Accessibility access, which sandboxed apps cannot use.
+	  Hardened Runtime stays enabled for notarization; no network entitlement is granted.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>

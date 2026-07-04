@@ -1,0 +1,62 @@
+name: Dockbars
+options:
+  bundleIdPrefix: com.acmgedik
+  deploymentTarget:
+    macOS: "15.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"          # Swift 5 language mode per spec (5.10+); avoids strict-concurrency churn
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_HARDENED_RUNTIME: YES  # required for future notarization
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  Dockbars:
+    type: application
+    platform: macOS
+    sources:
+      - path: Dockbars
+    info:
+      path: Dockbars/App/Info.plist
+      properties:
+        LSUIElement: true          # no Dock icon; menu-bar-only app
+        CFBundleName: Dockbars
+        CFBundleDisplayName: Dockbars
+        LSMinimumSystemVersion: "15.0"
+        NSHumanReadableCopyright: "© 2026 Dockbars. All data stays local."
+        NSAccessibilityUsageDescription: "Dockbars needs Accessibility access to detect when your pointer reaches the Dock edge and to read the Dock's position, so the hidden pocket can open in the right place."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.acmgedik.dockbars
+        CODE_SIGN_ENTITLEMENTS: Dockbars/App/Dockbars.entitlements
+        # App Sandbox is intentionally OFF (global mouse monitoring + Dock inspection
+        # require Accessibility, which is incompatible with sandbox). See entitlements.
+        ENABLE_APP_SANDBOX: NO
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+
+  DockbarsTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Dockbars
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.acmgedik.dockbars.tests
+        GENERATE_INFOPLIST_FILE: YES
+
+schemes:
+  Dockbars:
+    build:
+      targets:
+        Dockbars: all
+        DockbarsTests: [test]
+    test:
+      targets:
+        - DockbarsTests
