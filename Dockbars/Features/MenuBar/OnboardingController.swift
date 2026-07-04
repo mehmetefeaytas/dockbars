@@ -1,35 +1,36 @@
 import AppKit
 
-/// First-launch guidance for the Accessibility permission. Shows a one-time
-/// alert explaining why the permission is needed and how to grant it.
+/// Owns the first-run tutorial: decides whether to show it on launch and can
+/// re-open it on demand (from the menu bar or Settings).
 @MainActor
-enum OnboardingController {
-    private static let shownKey = "didShowAccessibilityOnboarding"
+final class OnboardingController {
+    private enum Keys {
+        static let completed = "didCompleteOnboarding"
+    }
 
-    static func showAccessibilityPrompt(force: Bool = false) {
-        let defaults = UserDefaults.standard
-        if !force && defaults.bool(forKey: shownKey) { return }
-        defaults.set(true, forKey: shownKey)
+    private let appState: AppState
+    private var windowController: TutorialWindowController?
 
-        let alert = NSAlert()
-        alert.messageText = "Enable Accessibility for Dockbars"
-        alert.informativeText = """
-        Dockbars watches for your pointer reaching the Dock edge to open the hidden pocket. \
-        macOS requires Accessibility access for this.
+    init(appState: AppState) {
+        self.appState = appState
+    }
 
-        Open System Settings → Privacy & Security → Accessibility and enable Dockbars.
-        """
-        alert.alertStyle = .informational
-        alert.addButton(withTitle: "Open System Settings")
-        alert.addButton(withTitle: "Later")
+    var hasCompleted: Bool {
+        UserDefaults.standard.bool(forKey: Keys.completed)
+    }
 
-        NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
-        let response = alert.runModal()
-        NSApp.setActivationPolicy(.accessory)
+    func showIfFirstLaunch() {
+        guard !hasCompleted else { return }
+        show()
+    }
 
-        if response == .alertFirstButtonReturn {
-            AccessibilityPermission.openSystemSettings()
+    func show() {
+        if windowController == nil {
+            windowController = TutorialWindowController(appState: appState)
+            windowController?.onClose = {
+                UserDefaults.standard.set(true, forKey: Keys.completed)
+            }
         }
+        windowController?.show()
     }
 }

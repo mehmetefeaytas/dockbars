@@ -27,4 +27,24 @@ enum PanelLayout {
         let height = padding * 2 + CGFloat(rows) * cell.height + CGFloat(rows - 1) * spacing
         return CGSize(width: width, height: height)
     }
+
+    /// How many item columns fit within `width` for the given icon size.
+    /// Returns 0 when not even one column fits.
+    static func columnsThatFit(width: CGFloat, iconSize: CGFloat) -> Int {
+        let cellWidth = cellSize(iconSize: iconSize).width
+        let usable = width - padding * 2 + spacing
+        guard usable > 0 else { return 0 }
+        return max(0, Int((usable / (cellWidth + spacing)).rounded(.down)))
+    }
+
+    /// Panel size for `itemCount` items laid out in `columns` columns.
+    static func adaptiveSize(iconSize: CGFloat, itemCount: Int, columns: Int) -> CGSize {
+        let cols = max(1, columns)
+        let count = max(1, itemCount)
+        let rows = max(1, Int((Double(count) / Double(cols)).rounded(.up)))
+        let cell = cellSize(iconSize: iconSize)
+        let width = padding * 2 + CGFloat(cols) * cell.width + CGFloat(cols - 1) * spacing
+        let height = padding * 2 + CGFloat(rows) * cell.height + CGFloat(rows - 1) * spacing
+        return CGSize(width: width, height: height)
+    }
 }

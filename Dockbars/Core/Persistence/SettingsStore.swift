@@ -8,6 +8,7 @@ import Combine
 /// SwiftUI controls. Stashes and items live in SwiftData (see Models.swift).
 final class SettingsStore: ObservableObject {
     private enum Keys {
+        static let placementMode = "placementMode"
         static let edge = "preferredEdge"
         static let closeDelay = "closeDelay"
         static let triggerZoneWidth = "triggerZoneWidth"
@@ -17,6 +18,10 @@ final class SettingsStore: ObservableObject {
 
     private let defaults: UserDefaults
 
+    /// How the pocket positions itself. Defaults to beside-the-Dock.
+    @Published var placementMode: PlacementMode {
+        didSet { defaults.set(placementMode.rawValue, forKey: Keys.placementMode) }
+    }
     @Published var preferredEdge: PanelEdge {
         didSet { defaults.set(preferredEdge.rawValue, forKey: Keys.edge) }
     }
@@ -41,6 +46,7 @@ final class SettingsStore: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        placementMode = PlacementMode(rawValue: defaults.string(forKey: Keys.placementMode) ?? "") ?? .dockAdjacent
         preferredEdge = PanelEdge(rawValue: defaults.string(forKey: Keys.edge) ?? "") ?? .right
         closeDelay = (defaults.object(forKey: Keys.closeDelay) as? Double) ?? 0.25
         triggerZoneWidth = (defaults.object(forKey: Keys.triggerZoneWidth) as? Double) ?? 4

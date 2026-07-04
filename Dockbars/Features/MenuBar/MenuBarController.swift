@@ -8,6 +8,7 @@ final class MenuBarController {
 
     var onTogglePanel: (() -> Void)?
     var onOpenSettings: (() -> Void)?
+    var onShowTutorial: (() -> Void)?
 
     init(appState: AppState) {
         self.appState = appState
@@ -36,6 +37,10 @@ final class MenuBarController {
         settings.target = self
         menu.addItem(settings)
 
+        let tutorial = NSMenuItem(title: "Show Tutorial…", action: #selector(showTutorial), keyEquivalent: "")
+        tutorial.target = self
+        menu.addItem(tutorial)
+
         menu.addItem(.separator())
 
         let quit = NSMenuItem(title: "Quit Dockbars", action: #selector(quit), keyEquivalent: "q")
@@ -47,5 +52,6 @@ final class MenuBarController {
 
     @objc private func toggle() { onTogglePanel?() }
     @objc private func openSettings() { onOpenSettings?() }
+    @objc private func showTutorial() { onShowTutorial?() }
     @objc private func quit() { NSApp.terminate(nil) }
 }

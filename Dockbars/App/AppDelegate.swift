@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var panelController: PanelController!
     private var menuBarController: MenuBarController!
     private var settingsWindowController: SettingsWindowController?
+    private var onboardingController: OnboardingController!
     private var settingsCancellable: AnyCancellable?
 
     private var reduceMotion: Bool {
@@ -48,16 +49,58 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         dockObserver.start()
 
+        onboardingController = OnboardingController(appState: appState)
+
+        // Actions the tutorial, Settings, and menu can trigger.
+        appState.onTogglePanel = { [weak self] in self?.togglePanel() }
+        appState.onShowTutorial = { [weak self] in self?.onboardingController.show() }
+        appState.onSeedDefaultApps = { [weak self] in self?.seedDefaultApps() ?? 0 }
+
         menuBarController = MenuBarController(appState: appState)
         menuBarController.onTogglePanel = { [weak self] in self?.togglePanel() }
         menuBarController.onOpenSettings = { [weak self] in self?.openSettings() }
+        menuBarController.onShowTutorial = { [weak self] in self?.onboardingController.show() }
 
         observeSettings()
 
-        // First-launch onboarding for the Accessibility permission.
+        // Test affordance: seed the pocket at launch when DOCKBARS_SEED_ON_LAUNCH=1.
+        if ProcessInfo.processInfo.environment["DOCKBARS_SEED_ON_LAUNCH"] == "1" {
+            let count = seedDefaultApps()
+            NSLog("Dockbars ▸ seeded \(count) apps on launch (test hook)")
+        }
+
+        logStartupDiagnostics()
+
+        // First launch: request Accessibility and walk the user through setup.
         if !AccessibilityPermission.isTrusted {
             AccessibilityPermission.requestIfNeeded()
-            OnboardingController.showAccessibilityPrompt()
+        }
+        onboardingController.showIfFirstLaunch()
+    }
+
+    /// Adds a set of common apps to the default stash. Returns the number added.
+    private func seedDefaultApps() -> Int {
+        let context = container.mainContext
+        guard let stash = try? context.fetch(FetchDescriptor<Stash>()).first else { return 0 }
+        return DefaultAppsSeeder.seed(into: stash, context: context)
+    }
+
+    /// Emits a one-shot snapshot of the resolved state at launch. Invaluable when
+    /// the app appears to "do nothing" — usually a missing Accessibility grant.
+    private func logStartupDiagnostics() {
+        let info = appState.dockInfo
+        NSLog("""
+        Dockbars ▸ launched. \
+        accessibilityTrusted=\(AccessibilityPermission.isTrusted) \
+        statusItemVisible=\(menuBarController != nil) \
+        dock.orientation=\(info.orientation.rawValue) \
+        dock.tileSize=\(info.tileSize) dock.autohide=\(info.autohide) \
+        resolvedEdge=\(appState.resolvedEdge.rawValue) \
+        screenFrame=\(NSStringFromRect(info.screenFrame)) \
+        visibleFrame=\(NSStringFromRect(info.visibleFrame))
+        """)
+        if !AccessibilityPermission.isTrusted {
+            NSLog("Dockbars ▸ Accessibility NOT granted — global hover detection is disabled. Grant it in System Settings ▸ Privacy & Security ▸ Accessibility. (The menu-bar 'Toggle Pocket' still works.)")
         }
     }
 
@@ -68,40 +111,49 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Geometry
 
+    /// Resolves the current placement from settings + Dock state + item count.
+    private func currentPlacement() -> DockGeometry.PlacementResult {
+        DockGeometry.placement(
+            mode: appState.settings.placementMode,
+            dockInfo: appState.dockInfo,
+            preferredEdge: appState.settings.preferredEdge,
+            iconSize: CGFloat(appState.settings.iconSize),
+            itemCount: currentItemCount(),
+            triggerThickness: CGFloat(appState.settings.triggerZoneWidth),
+            margin: 8
+        )
+    }
+
+    private func currentItemCount() -> Int {
+        let context = container.mainContext
+        guard let stash = try? context.fetch(FetchDescriptor<Stash>()).first else { return 0 }
+        return stash.items.count
+    }
+
     /// Recompute the trigger zone + panel layout. Called only when the Dock or
     /// settings change — never in the mouse-moved hot path.
     private func refreshGeometry() {
-        let info = appState.dockInfo
-        let edge = DockGeometry.resolveEdge(
-            preferred: appState.settings.preferredEdge,
-            orientation: info.orientation
-        )
-        appState.resolvedEdge = edge
-
-        let size = PanelLayout.panelSize(edge: edge, iconSize: CGFloat(appState.settings.iconSize))
-        let zone = DockGeometry.triggerZone(
-            edge: edge,
-            screenFrame: info.screenFrame,
-            thickness: CGFloat(appState.settings.triggerZoneWidth)
-        )
-        hoverEngine.updateTriggerZone(zone)
-        panelController.configure(edge: edge, size: size)
+        let placement = currentPlacement()
+        appState.resolvedEdge = placement.edge
+        hoverEngine.updateTriggerZone(placement.triggerZone)
+        panelController.configure(edge: placement.edge, size: placement.size)
     }
 
     // MARK: - Panel lifecycle
 
     private func openPanel() {
-        let info = appState.dockInfo
-        let edge = appState.resolvedEdge
-        let size = PanelLayout.panelSize(edge: edge, iconSize: CGFloat(appState.settings.iconSize))
-        let origin = DockGeometry.panelOrigin(edge: edge, panelSize: size, visibleFrame: info.visibleFrame)
-        panelController.show(edge: edge, origin: origin, size: size, reduceMotion: reduceMotion)
+        let placement = currentPlacement()
+        appState.resolvedEdge = placement.edge
+        panelController.show(edge: placement.edge, origin: placement.origin,
+                             size: placement.size, reduceMotion: reduceMotion)
         appState.isPanelVisible = true
+        NSLog("Dockbars ▸ openPanel mode=\(appState.settings.placementMode.rawValue) edge=\(placement.edge.rawValue) overflowed=\(placement.overflowed) frame=\(NSStringFromRect(CGRect(origin: placement.origin, size: placement.size)))")
     }
 
     private func closePanel() {
         panelController.hide(reduceMotion: reduceMotion)
         appState.isPanelVisible = false
+        NSLog("Dockbars ▸ closePanel")
     }
 
     private func togglePanel() {

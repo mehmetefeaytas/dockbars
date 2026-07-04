@@ -14,12 +14,16 @@ struct DockInfo: Equatable {
     var screenFrame: CGRect
     /// Usable bounds excluding the menu bar and a non-hidden Dock.
     var visibleFrame: CGRect
+    /// The Dock's actual tile rectangle (bottom-left origin), when resolvable via
+    /// Accessibility. Nil when hidden/unavailable — callers estimate instead.
+    var dockFrame: CGRect?
 
     static let fallback = DockInfo(
         orientation: .bottom,
         tileSize: 48,
         autohide: false,
         screenFrame: CGRect(x: 0, y: 0, width: 1440, height: 900),
-        visibleFrame: CGRect(x: 0, y: 70, width: 1440, height: 800)
+        visibleFrame: CGRect(x: 0, y: 70, width: 1440, height: 800),
+        dockFrame: nil
     )
 }

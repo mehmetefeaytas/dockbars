@@ -16,6 +16,11 @@ final class AppState: ObservableObject {
     @Published var isPanelVisible = false
     @Published var accessibilityTrusted: Bool
 
+    // Actions wired by AppDelegate so SwiftUI views and menus can drive behavior.
+    var onTogglePanel: (() -> Void)?
+    var onShowTutorial: (() -> Void)?
+    var onSeedDefaultApps: (() -> Int)?
+
     init(settings: SettingsStore, container: ModelContainer) {
         self.settings = settings
         self.container = container

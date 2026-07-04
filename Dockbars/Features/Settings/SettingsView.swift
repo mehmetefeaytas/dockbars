@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var appState: AppState
     @ObservedObject private var settings: SettingsStore
+    @State private var seedMessage: String?
 
     init(settings: SettingsStore) {
         self.settings = settings
@@ -17,12 +18,25 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section("Pocket") {
-                Picker("Edge", selection: $settings.preferredEdge) {
-                    ForEach(allowedEdges) { edge in
-                        Text(edge.displayName).tag(edge)
+                Picker("Placement", selection: $settings.placementMode) {
+                    ForEach(PlacementMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
                     }
                 }
-                .help("Which screen edge the pocket opens from. Options depend on your Dock position.")
+                .help(settings.placementMode.detail)
+
+                Text(settings.placementMode.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                if settings.placementMode == .screenEdge {
+                    Picker("Edge", selection: $settings.preferredEdge) {
+                        ForEach(allowedEdges) { edge in
+                            Text(edge.displayName).tag(edge)
+                        }
+                    }
+                    .help("Which screen edge the pocket opens from. Options depend on your Dock position.")
+                }
 
                 HStack {
                     Text("Icon size")
@@ -49,6 +63,28 @@ struct SettingsView: View {
                         .frame(width: 48, alignment: .trailing)
                 }
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
+            }
+
+            Section("Getting Started") {
+                Button {
+                    appState.onShowTutorial?()
+                } label: {
+                    Label("Show Tutorial", systemImage: "graduationcap")
+                }
+                Button {
+                    appState.onTogglePanel?()
+                } label: {
+                    Label("Open Pocket Now", systemImage: "eye")
+                }
+                Button {
+                    let count = appState.onSeedDefaultApps?() ?? 0
+                    seedMessage = count > 0 ? "Added \(count) apps." : "Common apps already added."
+                } label: {
+                    Label("Add Common Apps", systemImage: "sparkles")
+                }
+                if let seedMessage {
+                    Text(seedMessage).font(.caption).foregroundStyle(.secondary)
+                }
             }
 
             Section("Permissions") {

@@ -71,4 +71,116 @@ enum DockGeometry {
         guard upper > lower else { return lower }
         return max(lower, min(upper, value))
     }
+
+    // MARK: - Placement (edge vs. dock-adjacent)
+
+    /// Fully-resolved placement for the pocket.
+    struct PlacementResult: Equatable {
+        var edge: PanelEdge       // layout orientation + slide direction
+        var origin: CGPoint       // panel origin (bottom-left)
+        var size: CGSize          // panel size
+        var triggerZone: CGRect   // where hovering opens the pocket
+        var overflowed: Bool      // dock-adjacent: repositioned because it didn't fit beside
+    }
+
+    /// Keep a reasonable minimum pocket size even for small/empty stashes.
+    private static let minimumSlots = 4
+
+    static func placement(mode: PlacementMode,
+                          dockInfo: DockInfo,
+                          preferredEdge: PanelEdge,
+                          iconSize: CGFloat,
+                          itemCount: Int,
+                          triggerThickness: CGFloat,
+                          margin: CGFloat) -> PlacementResult {
+        let count = max(itemCount, minimumSlots)
+        switch mode {
+        case .screenEdge:
+            let edge = resolveEdge(preferred: preferredEdge, orientation: dockInfo.orientation)
+            let maxColumns = edge.isVertical ? 3 : 6
+            let columns = min(maxColumns, count)
+            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: count, columns: columns)
+            let origin = panelOrigin(edge: edge, panelSize: size, visibleFrame: dockInfo.visibleFrame)
+            let trigger = triggerZone(edge: edge, screenFrame: dockInfo.screenFrame, thickness: triggerThickness)
+            return PlacementResult(edge: edge, origin: origin, size: size, triggerZone: trigger, overflowed: false)
+
+        case .dockAdjacent:
+            return dockAdjacentPlacement(dockInfo: dockInfo, iconSize: iconSize, itemCount: count,
+                                         triggerThickness: triggerThickness, margin: margin)
+        }
+    }
+
+    /// Best-effort Dock rectangle when Accessibility can't provide one (hidden Dock).
+    /// Assumes a centered Dock occupying ~half the relevant screen dimension.
+    static func estimateDockFrame(_ info: DockInfo) -> CGRect {
+        let screen = info.screenFrame
+        let thickness = max(info.tileSize * 1.3, 60)
+        switch info.orientation {
+        case .bottom:
+            let width = screen.width * 0.5
+            return CGRect(x: screen.midX - width / 2, y: screen.minY, width: width, height: thickness)
+        case .left:
+            let height = screen.height * 0.5
+            return CGRect(x: screen.minX, y: screen.midY - height / 2, width: thickness, height: height)
+        case .right:
+            let height = screen.height * 0.5
+            return CGRect(x: screen.maxX - thickness, y: screen.midY - height / 2, width: thickness, height: height)
+        }
+    }
+
+    private static func dockAdjacentPlacement(dockInfo: DockInfo,
+                                              iconSize: CGFloat,
+                                              itemCount: Int,
+                                              triggerThickness: CGFloat,
+                                              margin: CGFloat) -> PlacementResult {
+        let dock = dockInfo.dockFrame ?? estimateDockFrame(dockInfo)
+        let screen = dockInfo.screenFrame
+        let visible = dockInfo.visibleFrame
+        let t = max(1, triggerThickness)
+
+        switch dockInfo.orientation {
+        case .bottom:
+            let gapLeft = dock.minX - screen.minX
+            let besideColumns = PanelLayout.columnsThatFit(width: gapLeft - margin, iconSize: iconSize)
+            if besideColumns >= 1 {
+                let columns = min(besideColumns, itemCount)
+                let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+                let availableHeight = visible.maxY - dock.minY - margin
+                if size.height <= availableHeight {
+                    // Fits in the bottom-left gap, beside the Dock.
+                    let origin = CGPoint(x: screen.minX + margin, y: dock.minY)
+                    let trigger = CGRect(x: screen.minX, y: screen.minY, width: max(gapLeft, 24), height: t)
+                    return PlacementResult(edge: .bottom, origin: origin, size: size,
+                                           triggerZone: trigger, overflowed: false)
+                }
+            }
+            // Too large to fit beside → stack above the Dock, using the full width.
+            let aboveColumns = max(1, PanelLayout.columnsThatFit(width: visible.width * 0.6, iconSize: iconSize))
+            let columns = min(aboveColumns, itemCount)
+            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+            let x = clamp(dock.midX - size.width / 2, visible.minX, max(visible.minX, visible.maxX - size.width))
+            let y = dock.maxY + margin
+            let trigger = CGRect(x: screen.minX, y: screen.minY, width: max(gapLeft, 120), height: t)
+            return PlacementResult(edge: .bottom, origin: CGPoint(x: x, y: y), size: size,
+                                   triggerZone: trigger, overflowed: true)
+
+        case .left:
+            let columns = min(3, itemCount)
+            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+            let y = clamp(dock.minY, visible.minY, max(visible.minY, visible.maxY - size.height))
+            let origin = CGPoint(x: dock.maxX + margin, y: y)
+            let trigger = CGRect(x: screen.minX, y: screen.minY, width: t, height: screen.height)
+            return PlacementResult(edge: .left, origin: origin, size: size,
+                                   triggerZone: trigger, overflowed: false)
+
+        case .right:
+            let columns = min(3, itemCount)
+            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+            let y = clamp(dock.minY, visible.minY, max(visible.minY, visible.maxY - size.height))
+            let origin = CGPoint(x: dock.minX - size.width - margin, y: y)
+            let trigger = CGRect(x: screen.maxX - t, y: screen.minY, width: t, height: screen.height)
+            return PlacementResult(edge: .right, origin: origin, size: size,
+                                   triggerZone: trigger, overflowed: false)
+        }
+    }
 }

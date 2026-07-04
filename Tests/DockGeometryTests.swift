@@ -80,4 +80,82 @@ final class DockGeometryTests: XCTestCase {
         let start = DockGeometry.offscreenOrigin(from: CGPoint(x: 100, y: 50), edge: .bottom, distance: 16)
         XCTAssertEqual(start, CGPoint(x: 100, y: 34))
     }
+
+    // MARK: - Dock-adjacent placement
+
+    /// A centered Dock (like the real machine): 212px gaps on each side.
+    private func bottomDockInfo(dockFrame: CGRect?) -> DockInfo {
+        DockInfo(orientation: .bottom, tileSize: 57, autohide: false,
+                 screenFrame: screen, visibleFrame: visible, dockFrame: dockFrame)
+    }
+
+    func testDockAdjacentFitsBesideDockAtBottomLeft() {
+        let dock = CGRect(x: 212, y: 10, width: 1046, height: 77) // 212px left gap
+        let placement = DockGeometry.placement(
+            mode: .dockAdjacent, dockInfo: bottomDockInfo(dockFrame: dock),
+            preferredEdge: .right, iconSize: 48, itemCount: 6,
+            triggerThickness: 4, margin: 8)
+
+        XCTAssertFalse(placement.overflowed)
+        XCTAssertEqual(placement.edge, .bottom)
+        // Anchored to the bottom-left, beside the Dock.
+        XCTAssertEqual(placement.origin.x, screen.minX + 8, accuracy: 0.001)
+        XCTAssertEqual(placement.origin.y, dock.minY, accuracy: 0.001)
+        // Must fit within the left gap.
+        XCTAssertLessThanOrEqual(placement.origin.x + placement.size.width, dock.minX)
+    }
+
+    func testDockAdjacentOverflowsAboveWhenGapTooNarrow() {
+        // Very wide Dock leaves almost no side gap → can't fit beside.
+        let dock = CGRect(x: 20, y: 10, width: 1430, height: 77)
+        let placement = DockGeometry.placement(
+            mode: .dockAdjacent, dockInfo: bottomDockInfo(dockFrame: dock),
+            preferredEdge: .right, iconSize: 48, itemCount: 6,
+            triggerThickness: 4, margin: 8)
+
+        XCTAssertTrue(placement.overflowed)
+        XCTAssertEqual(placement.edge, .bottom)
+        // Stacked directly above the Dock.
+        XCTAssertEqual(placement.origin.y, dock.maxY + 8, accuracy: 0.001)
+        // Horizontally centered over the Dock.
+        XCTAssertEqual(placement.origin.x + placement.size.width / 2, dock.midX, accuracy: 1.0)
+    }
+
+    func testDockAdjacentOverflowsAboveWhenTooManyItemsToStackBeside() {
+        let dock = CGRect(x: 212, y: 10, width: 1046, height: 77)
+        // A tiny visible height forces the beside column to exceed available height.
+        let shortInfo = DockInfo(orientation: .bottom, tileSize: 57, autohide: false,
+                                 screenFrame: screen,
+                                 visibleFrame: CGRect(x: 0, y: 0, width: 1470, height: 260),
+                                 dockFrame: dock)
+        let placement = DockGeometry.placement(
+            mode: .dockAdjacent, dockInfo: shortInfo,
+            preferredEdge: .right, iconSize: 48, itemCount: 40,
+            triggerThickness: 4, margin: 8)
+
+        XCTAssertTrue(placement.overflowed)
+    }
+
+    func testDockAdjacentUsesEstimateWhenDockFrameUnavailable() {
+        // No AX dock frame (e.g. autohidden). Should still place beside using an estimate.
+        let placement = DockGeometry.placement(
+            mode: .dockAdjacent, dockInfo: bottomDockInfo(dockFrame: nil),
+            preferredEdge: .right, iconSize: 48, itemCount: 4,
+            triggerThickness: 4, margin: 8)
+
+        XCTAssertFalse(placement.overflowed)
+        XCTAssertEqual(placement.edge, .bottom)
+        XCTAssertEqual(placement.origin.x, screen.minX + 8, accuracy: 0.001)
+    }
+
+    func testScreenEdgePlacementResolvesEdgeAndNeverOverflows() {
+        let placement = DockGeometry.placement(
+            mode: .screenEdge, dockInfo: bottomDockInfo(dockFrame: nil),
+            preferredEdge: .left, iconSize: 48, itemCount: 6,
+            triggerThickness: 4, margin: 8)
+
+        XCTAssertFalse(placement.overflowed)
+        XCTAssertEqual(placement.edge, .left) // valid for a bottom Dock
+        XCTAssertEqual(placement.origin.x, visible.minX, accuracy: 0.001)
+    }
 }

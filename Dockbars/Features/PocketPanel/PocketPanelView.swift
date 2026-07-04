@@ -16,8 +16,10 @@ struct PocketPanelView: View {
     private var iconSize: CGFloat { CGFloat(appState.settings.iconSize) }
 
     private var columns: [GridItem] {
-        let count = PanelLayout.columns(edge: appState.resolvedEdge)
-        return Array(repeating: GridItem(.flexible(), spacing: PanelLayout.spacing), count: count)
+        // Adaptive: fills the panel with as many fixed-width columns as fit,
+        // matching the column count the placement math sized the panel for.
+        let cellWidth = PanelLayout.cellSize(iconSize: iconSize).width
+        return [GridItem(.adaptive(minimum: cellWidth, maximum: cellWidth), spacing: PanelLayout.spacing)]
     }
 
     private var sortedItems: [StashItem] {

@@ -60,12 +60,16 @@ final class DockObserver {
         let screen = NSScreen.main ?? NSScreen.screens.first
         guard let screen else { return .fallback }
 
+        let primary = NSScreen.screens.first?.frame ?? screen.frame
+        let dockFrame = DockFrameReader.currentDockFrame(primaryScreen: primary)
+
         return DockInfo(
             orientation: orientation,
             tileSize: CGFloat(tileSize),
             autohide: autohide,
             screenFrame: screen.frame,
-            visibleFrame: screen.visibleFrame
+            visibleFrame: screen.visibleFrame,
+            dockFrame: dockFrame
         )
     }
 
