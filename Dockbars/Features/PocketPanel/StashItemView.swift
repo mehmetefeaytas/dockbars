@@ -16,10 +16,7 @@ struct StashItemView: View {
     let onRemove: () -> Void
 
     private var icon: NSImage {
-        if let url = item.resolvedURL {
-            return IconProvider.icon(for: url, size: iconSize)
-        }
-        return NSWorkspace.shared.icon(for: .data)
+        ItemLauncher.icon(for: item, size: iconSize)
     }
 
     private var cellSize: CGSize { PanelLayout.cellSize(iconSize: iconSize) }

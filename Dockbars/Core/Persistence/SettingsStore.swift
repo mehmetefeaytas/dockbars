@@ -15,6 +15,7 @@ final class SettingsStore: ObservableObject {
         static let triggerZoneWidth = "triggerZoneWidth"
         static let iconSize = "iconSize"
         static let launchAtLogin = "launchAtLogin"
+        static let showRunningApps = "showRunningApps"
     }
 
     private let defaults: UserDefaults
@@ -48,6 +49,10 @@ final class SettingsStore: ObservableObject {
             defaults.set(launchAtLogin, forKey: Keys.launchAtLogin)
         }
     }
+    /// Show a live section of running apps not already in the pocket.
+    @Published var showRunningApps: Bool {
+        didSet { defaults.set(showRunningApps, forKey: Keys.showRunningApps) }
+    }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -58,5 +63,6 @@ final class SettingsStore: ObservableObject {
         triggerZoneWidth = (defaults.object(forKey: Keys.triggerZoneWidth) as? Double) ?? 4
         iconSize = (defaults.object(forKey: Keys.iconSize) as? Double) ?? 48
         launchAtLogin = LaunchAtLogin.isEnabled
+        showRunningApps = defaults.bool(forKey: Keys.showRunningApps)
     }
 }

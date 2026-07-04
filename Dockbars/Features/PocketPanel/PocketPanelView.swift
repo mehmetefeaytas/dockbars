@@ -9,6 +9,7 @@ struct PocketPanelView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Stash.order) private var stashes: [Stash]
 
+    @StateObject private var runningApps = RunningAppsMonitor()
     @State private var isDropTargeted = false
     @State private var isRemoveTargeted = false
     /// The item currently being dragged (set when its drag begins), so the trash
@@ -104,11 +105,18 @@ struct PocketPanelView: View {
         HStack(spacing: 8) {
             stashMenu
             Spacer(minLength: 4)
-            Button(action: addViaOpenPanel) {
+            Menu {
+                Button("Add Files…") { addViaOpenPanel() }
+                Button("Add URL…") { addURL() }
+                Button("Add Shortcut…") { addShortcut() }
+                Button("Add Script…") { addScript() }
+            } label: {
                 Image(systemName: "plus")
             }
-            .buttonStyle(.borderless)
-            .help("Add apps or files…")
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Add apps, files, a URL, a Shortcut, or a script")
 
             // Drag an item here to remove it from the stash.
             Image(systemName: isRemoveTargeted ? "trash.fill" : "trash")
@@ -176,6 +184,27 @@ struct PocketPanelView: View {
                 }
             }
             .padding(PanelLayout.padding)
+
+            if appState.settings.showRunningApps && !runningApps.apps.isEmpty {
+                runningSection
+            }
+        }
+    }
+
+    private var runningSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Divider().opacity(0.4)
+            Text("Running")
+                .font(.caption).bold()
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, PanelLayout.padding)
+            LazyVGrid(columns: columns, spacing: PanelLayout.spacing) {
+                ForEach(runningApps.apps, id: \.processIdentifier) { app in
+                    RunningAppView(app: app, iconSize: iconSize)
+                }
+            }
+            .padding(.horizontal, PanelLayout.padding)
+            .padding(.bottom, PanelLayout.padding)
         }
     }
 
@@ -212,12 +241,11 @@ struct PocketPanelView: View {
     // MARK: - Item actions
 
     private func open(_ item: StashItem) {
-        guard let url = item.resolvedURL else { return }
-        NSWorkspace.shared.open(url)
+        ItemLauncher.open(item)
     }
 
     private func reveal(_ item: StashItem) {
-        guard let url = item.resolvedURL else { return }
+        guard ItemLauncher.canRevealInFinder(item), let url = item.resolvedURL else { return }
         NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
@@ -282,6 +310,36 @@ struct PocketPanelView: View {
         for (offset, url) in panel.urls.enumerated() {
             addItem(url: url, to: stash, order: baseOrder + offset)
         }
+    }
+
+    private func addURL() {
+        guard let stash = currentStash,
+              let input = InputPrompt.string(title: "Add URL", message: "Enter a web address", defaultValue: "https://") else { return }
+        var text = input
+        if !text.contains("://") { text = "https://" + text }
+        guard let url = URL(string: text) else { return }
+        let name = url.host ?? text
+        insert(StashItem(displayName: name, urlString: text, kind: .url), into: stash)
+    }
+
+    private func addShortcut() {
+        guard let stash = currentStash,
+              let name = InputPrompt.string(title: "Add Shortcut", message: "Enter the exact Shortcut name") else { return }
+        insert(StashItem(displayName: name, urlString: "dockbars-shortcut:\(name)", kind: .shortcut, payload: name), into: stash)
+    }
+
+    private func addScript() {
+        guard let stash = currentStash,
+              let name = InputPrompt.string(title: "Add Script", message: "Name this script") else { return }
+        guard let body = InputPrompt.string(title: "Script for “\(name)”", message: "Shell command to run") else { return }
+        insert(StashItem(displayName: name, urlString: "dockbars-script:\(name)", kind: .script, payload: body), into: stash)
+    }
+
+    private func insert(_ item: StashItem, into stash: Stash) {
+        item.order = (stash.items.map(\.order).max() ?? -1) + 1
+        item.stash = stash
+        context.insert(item)
+        try? context.save()
     }
 
     private func handleAddDrop(_ providers: [NSItemProvider]) -> Bool {

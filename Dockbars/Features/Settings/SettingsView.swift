@@ -69,6 +69,7 @@ struct SettingsView: View {
                         .frame(width: 48, alignment: .trailing)
                 }
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
+                Toggle("Show running apps", isOn: $settings.showRunningApps)
             }
 
             Section("Getting Started") {
