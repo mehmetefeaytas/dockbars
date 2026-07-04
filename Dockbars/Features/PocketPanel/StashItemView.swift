@@ -7,6 +7,7 @@ struct StashItemView: View {
     let item: StashItem
     let iconSize: CGFloat
     let moveTargets: [Stash]
+    var isHighlighted: Bool = false
     let onOpen: () -> Void
     let onReveal: () -> Void
     let onRename: () -> Void
@@ -37,6 +38,10 @@ struct StashItemView: View {
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(isHovering ? Color.primary.opacity(0.12) : Color.clear)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(isHighlighted ? Color.accentColor : Color.clear, lineWidth: 2)
         )
         .contentShape(Rectangle())
         .onHover { isHovering = $0 }

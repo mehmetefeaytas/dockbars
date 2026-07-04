@@ -23,6 +23,10 @@ final class PocketPanel: NSPanel {
         isExcludedFromWindowsMenu = true
     }
 
-    override var canBecomeKey: Bool { false }
+    /// Hover-opened pockets stay non-key (never steal focus). Explicitly-invoked
+    /// pockets (menu bar / shortcut) set this true to accept keyboard input.
+    var keyable = false
+
+    override var canBecomeKey: Bool { keyable }
     override var canBecomeMain: Bool { false }
 }

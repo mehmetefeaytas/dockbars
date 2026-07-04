@@ -45,15 +45,17 @@ final class PanelController {
         }
     }
 
-    func show(edge: PanelEdge, origin: CGPoint, size: CGSize, reduceMotion: Bool) {
+    func show(edge: PanelEdge, origin: CGPoint, size: CGSize, reduceMotion: Bool, activated: Bool = false) {
         self.edge = edge
         self.panelSize = size
+        panel.keyable = activated
         panel.setContentSize(size)
 
         let finalFrame = CGRect(origin: origin, size: size)
 
         guard !isVisible else {
             panel.setFrame(finalFrame, display: true)
+            if activated { activate() }
             return
         }
         isVisible = true
@@ -61,7 +63,7 @@ final class PanelController {
         if reduceMotion {
             panel.alphaValue = 0
             panel.setFrame(finalFrame, display: true)
-            panel.orderFrontRegardless()
+            order(activated: activated)
             NSAnimationContext.runAnimationGroup { ctx in
                 ctx.duration = animationDuration
                 panel.animator().alphaValue = 1
@@ -72,7 +74,7 @@ final class PanelController {
         let startOrigin = DockGeometry.offscreenOrigin(from: origin, edge: edge, distance: slideDistance)
         panel.alphaValue = 0
         panel.setFrame(CGRect(origin: startOrigin, size: size), display: false)
-        panel.orderFrontRegardless()
+        order(activated: activated)
 
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = animationDuration
@@ -80,6 +82,22 @@ final class PanelController {
             panel.animator().alphaValue = 1
             panel.animator().setFrame(finalFrame, display: true)
         }
+    }
+
+    /// Order the panel in — as a key window when activated (keyboard/search),
+    /// otherwise without stealing focus from the active app.
+    private func order(activated: Bool) {
+        if activated {
+            NSApp.activate(ignoringOtherApps: true)
+            panel.makeKeyAndOrderFront(nil)
+        } else {
+            panel.orderFrontRegardless()
+        }
+    }
+
+    private func activate() {
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
     }
 
     func hide(reduceMotion: Bool) {

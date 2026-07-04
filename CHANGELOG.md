@@ -4,6 +4,23 @@ All notable changes to Dockbars are documented here.
 
 ## [Unreleased]
 
+### Phase 2 (part 2) — search & keyboard navigation
+
+**Added**
+- **Activated mode** — opening from the menu bar makes the pocket a key window
+  (`PocketPanel.keyable`) so it accepts keyboard input; **hover/drag opens stay
+  non-activating and never steal focus** (Phase 1 guarantee preserved).
+- **Type-to-search** — in activated mode, start typing to filter the current stash
+  (case-insensitive). A search bar shows the query; ✕ / Esc clears it; "No matches" state.
+  Keys are captured via SwiftUI `.onKeyPress` on the focused panel (no global key tap).
+- **Keyboard navigation** — arrow keys move a highlight, Return opens the highlighted
+  item, Esc clears the search or closes the pocket, and **⌘1–9 switch stashes**.
+- Selected-item highlight ring; grid column count tracked for arrow navigation.
+
+**Notes**
+- Search/keyboard require the activated (menu-bar-opened) pocket; the hover pocket
+  stays mouse-only by design so it never takes focus from your active app.
+
 ### Phase 2 (part 1) — drag fix, multiple stashes, themes
 
 **Fixed**

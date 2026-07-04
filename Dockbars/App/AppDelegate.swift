@@ -76,6 +76,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let count = seedDefaultApps()
             NSLog("Dockbars ▸ seeded \(count) apps on launch (test hook)")
         }
+        // Maintenance hook: unregister the login item and quit (cleans up test state).
+        if ProcessInfo.processInfo.environment["DOCKBARS_UNREGISTER_LOGIN"] == "1" {
+            try? LaunchAtLogin.setEnabled(false)
+            UserDefaults.standard.set(false, forKey: "launchAtLogin")
+            NSLog("Dockbars ▸ unregistered login item; quitting.")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { NSApp.terminate(nil) }
+            return
+        }
+        // Test affordance: open the pocket activated (keyboard/search) at launch.
+        if ProcessInfo.processInfo.environment["DOCKBARS_ACTIVATE_ON_LAUNCH"] == "1" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                self?.togglePanel()
+            }
+        }
 
         logStartupDiagnostics()
 
@@ -151,18 +165,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Panel lifecycle
 
+    /// Set just before requesting an open to mark whether the next open should be
+    /// a key window (keyboard + search). Hover/drag opens leave it false.
+    private var pendingActivated = false
+
     private func openPanel() {
+        let activated = pendingActivated
+        pendingActivated = false
         let placement = currentPlacement()
         appState.resolvedEdge = placement.edge
         panelController.show(edge: placement.edge, origin: placement.origin,
-                             size: placement.size, reduceMotion: reduceMotion)
+                             size: placement.size, reduceMotion: reduceMotion, activated: activated)
         appState.isPanelVisible = true
-        NSLog("Dockbars ▸ openPanel mode=\(appState.settings.placementMode.rawValue) edge=\(placement.edge.rawValue) overflowed=\(placement.overflowed) frame=\(NSStringFromRect(CGRect(origin: placement.origin, size: placement.size)))")
+        appState.panelActivated = activated
+        NSLog("Dockbars ▸ openPanel mode=\(appState.settings.placementMode.rawValue) edge=\(placement.edge.rawValue) activated=\(activated) overflowed=\(placement.overflowed) frame=\(NSStringFromRect(CGRect(origin: placement.origin, size: placement.size)))")
     }
 
     private func closePanel() {
         panelController.hide(reduceMotion: reduceMotion)
         appState.isPanelVisible = false
+        appState.panelActivated = false
         NSLog("Dockbars ▸ closePanel")
     }
 
@@ -170,6 +192,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if panelController.isVisible {
             hoverEngine.requestClose()
         } else {
+            pendingActivated = true // menu-invoked → enable keyboard/search
             hoverEngine.requestOpen()
         }
     }

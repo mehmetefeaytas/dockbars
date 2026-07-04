@@ -18,6 +18,8 @@ final class AppState: ObservableObject {
 
     /// Index of the currently shown stash (Phase 2 multi-stash).
     @Published var selectedStashIndex = 0
+    /// True when the pocket was opened as a key window (keyboard + search enabled).
+    @Published var panelActivated = false
 
     // Actions wired by AppDelegate so SwiftUI views and menus can drive behavior.
     var onTogglePanel: (() -> Void)?

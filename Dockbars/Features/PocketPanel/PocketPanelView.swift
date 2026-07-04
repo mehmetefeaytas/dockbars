@@ -11,6 +11,10 @@ struct PocketPanelView: View {
 
     @State private var isDropTargeted = false
     @State private var isRemoveTargeted = false
+    @State private var searchText = ""
+    @State private var highlighted = 0
+    @State private var gridColumns = 3
+    @FocusState private var keyboardFocused: Bool
 
     private var clampedIndex: Int {
         guard !stashes.isEmpty else { return 0 }
@@ -21,13 +25,20 @@ struct PocketPanelView: View {
 
     private var iconSize: CGFloat { CGFloat(appState.settings.iconSize) }
 
+    private var cellWidth: CGFloat { PanelLayout.cellSize(iconSize: iconSize).width }
+
     private var columns: [GridItem] {
-        let cellWidth = PanelLayout.cellSize(iconSize: iconSize).width
-        return [GridItem(.adaptive(minimum: cellWidth, maximum: cellWidth), spacing: PanelLayout.spacing)]
+        [GridItem(.adaptive(minimum: cellWidth, maximum: cellWidth), spacing: PanelLayout.spacing)]
     }
 
     private var sortedItems: [StashItem] {
         (currentStash?.items ?? []).sorted { $0.order < $1.order }
+    }
+
+    /// Items after applying the search filter.
+    private var filteredItems: [StashItem] {
+        guard !searchText.isEmpty else { return sortedItems }
+        return sortedItems.filter { $0.displayName.localizedCaseInsensitiveContains(searchText) }
     }
 
     private var moveTargets: [Stash] {
@@ -37,8 +48,11 @@ struct PocketPanelView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+            if appState.panelActivated || !searchText.isEmpty {
+                searchBar
+            }
             Divider().opacity(0.4)
-            if sortedItems.isEmpty {
+            if filteredItems.isEmpty {
                 emptyState
             } else {
                 grid
@@ -53,6 +67,38 @@ struct PocketPanelView: View {
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
             handleAddDrop(providers)
         }
+        .focusable()
+        .focused($keyboardFocused)
+        .onKeyPress { press in handleKey(press) }
+        .onChange(of: appState.panelActivated) { _, activated in
+            keyboardFocused = activated
+        }
+        .onChange(of: appState.isPanelVisible) { _, visible in
+            if !visible { searchText = ""; highlighted = 0 }
+        }
+        .onChange(of: appState.selectedStashIndex) { _, _ in
+            searchText = ""; highlighted = 0
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            Text(searchText.isEmpty ? "Type to search" : searchText)
+                .foregroundStyle(searchText.isEmpty ? .secondary : .primary)
+                .lineLimit(1)
+            Spacer()
+            if !searchText.isEmpty {
+                Button { searchText = ""; highlighted = 0 } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
+                }
+                .buttonStyle(.borderless)
+            }
+        }
+        .font(.callout)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
     }
 
     // MARK: - Header
@@ -113,9 +159,10 @@ struct PocketPanelView: View {
     private var grid: some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: PanelLayout.spacing) {
-                ForEach(sortedItems) { item in
+                ForEach(Array(filteredItems.enumerated()), id: \.element.persistentModelID) { index, item in
                     StashItemView(
                         item: item, iconSize: iconSize, moveTargets: moveTargets,
+                        isHighlighted: appState.panelActivated && index == highlighted,
                         onOpen: { open(item) },
                         onReveal: { reveal(item) },
                         onRename: { renameItem(item) },
@@ -125,23 +172,82 @@ struct PocketPanelView: View {
                 }
             }
             .padding(PanelLayout.padding)
+            .background(GeometryReader { geo in
+                Color.clear.onChange(of: geo.size.width, initial: true) { _, width in
+                    gridColumns = max(1, Int((width - PanelLayout.spacing) / (cellWidth + PanelLayout.spacing)))
+                }
+            })
         }
     }
 
+    @ViewBuilder
     private var emptyState: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "tray")
-                .font(.system(size: 28))
-                .foregroundStyle(.secondary)
-            Text("Drop apps or files here")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-            Button(action: addViaOpenPanel) {
-                Label("Add…", systemImage: "plus")
+        if !searchText.isEmpty {
+            VStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 24))
+                    .foregroundStyle(.secondary)
+                Text("No matches for “\(searchText)”")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
+        } else {
+            VStack(spacing: 10) {
+                Image(systemName: "tray")
+                    .font(.system(size: 28))
+                    .foregroundStyle(.secondary)
+                Text("Drop apps or files here")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                Button(action: addViaOpenPanel) {
+                    Label("Add…", systemImage: "plus")
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding()
+    }
+
+    // MARK: - Keyboard
+
+    private func handleKey(_ press: KeyPress) -> KeyPress.Result {
+        // ⌘1–9 switches stash.
+        if press.modifiers.contains(.command), let digit = Int(press.characters), (1...9).contains(digit) {
+            if digit - 1 < stashes.count { appState.selectedStashIndex = digit - 1 }
+            return .handled
+        }
+        switch press.key {
+        case .escape:
+            if !searchText.isEmpty { searchText = ""; highlighted = 0 } else { appState.onTogglePanel?() }
+            return .handled
+        case .return:
+            if let item = filteredItems[safe: highlighted] { open(item) }
+            return .handled
+        case .leftArrow: moveHighlight(-1); return .handled
+        case .rightArrow: moveHighlight(1); return .handled
+        case .upArrow: moveHighlight(-gridColumns); return .handled
+        case .downArrow: moveHighlight(gridColumns); return .handled
+        case .deleteForward, .delete:
+            if !searchText.isEmpty { searchText.removeLast(); highlighted = 0 }
+            return .handled
+        default:
+            // Printable character → append to the search query.
+            if !press.modifiers.contains(.command), !press.modifiers.contains(.control),
+               press.characters.count == 1,
+               let scalar = press.characters.unicodeScalars.first, scalar.value >= 32 {
+                searchText.append(press.characters)
+                highlighted = 0
+                return .handled
+            }
+            return .ignored
+        }
+    }
+
+    private func moveHighlight(_ delta: Int) {
+        guard !filteredItems.isEmpty else { return }
+        highlighted = min(max(highlighted + delta, 0), filteredItems.count - 1)
     }
 
     // MARK: - Item actions
