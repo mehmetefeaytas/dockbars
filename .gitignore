@@ -23,3 +23,9 @@ Dockbars.xcodeproj/
 # Secrets / signing
 *.p12
 *.mobileprovision
+
+# Vercel
+.vercel/
+website/.vercel/
+*.png
+!Dockbars/**/*.png

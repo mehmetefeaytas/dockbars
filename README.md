@@ -1,5 +1,7 @@
 # Dockbars
 
+**Website:** [dockbars.vercel.app](https://dockbars.vercel.app) (EN · TR · DE · ES)
+
 A native macOS hidden **Dock pocket**. Move your pointer to the edge of the screen next
 to the Dock and a panel of your favorite apps and files slides out — a natural extension
 of the Dock, not a replacement for it.
