@@ -16,6 +16,7 @@ struct StashItemView: View {
     let onMove: (Stash) -> Void
     let onRemove: () -> Void
     var onTogglePin: () -> Void = {}
+    var onSetIcon: () -> Void = {}
 
     @State private var peekTask: Task<Void, Never>?
 
@@ -37,6 +38,7 @@ struct StashItemView: View {
                 moveTargets: moveTargets.map { stash in (stash.name, { onMove(stash) }) },
                 isPinned: item.isPinned,
                 togglePin: onTogglePin,
+                setIcon: onSetIcon,
                 dragBegan: onDragStart
             ),
             content: AnyView(cell)

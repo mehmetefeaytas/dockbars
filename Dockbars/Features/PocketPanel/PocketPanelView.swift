@@ -123,6 +123,7 @@ struct PocketPanelView: View {
                 Button("Add URL…") { addURL() }
                 Button("Add Shortcut…") { addShortcut() }
                 Button("Add Script…") { addScript() }
+                Button("Add Snippet…") { addSnippet() }
             } label: {
                 Image(systemName: "plus")
             }
@@ -202,7 +203,8 @@ struct PocketPanelView: View {
                         onRename: { renameItem(item) },
                         onMove: { moveItem(item, to: $0) },
                         onRemove: { remove(item) },
-                        onTogglePin: { togglePin(item) }
+                        onTogglePin: { togglePin(item) },
+                        onSetIcon: { setCustomIcon(item) }
                     )
                 }
             }
@@ -424,6 +426,24 @@ struct PocketPanelView: View {
               let name = InputPrompt.string(title: "Add Script", message: "Name this script") else { return }
         guard let body = InputPrompt.string(title: "Script for “\(name)”", message: "Shell command to run") else { return }
         insert(StashItem(displayName: name, urlString: "dockbars-script:\(name)", kind: .script, payload: body), into: stash)
+    }
+
+    private func addSnippet() {
+        guard let stash = currentStash,
+              let name = InputPrompt.string(title: "Add Snippet", message: "Name this snippet") else { return }
+        guard let text = InputPrompt.string(title: "Snippet “\(name)”", message: "Text to copy when clicked") else { return }
+        insert(StashItem(displayName: name, urlString: "dockbars-snippet:\(name)", kind: .snippet, payload: text), into: stash)
+    }
+
+    private func setCustomIcon(_ item: StashItem) {
+        let current = item.customIcon ?? ""
+        guard let emoji = InputPrompt.string(title: "Set Icon", message: "Enter an emoji (blank to reset)", defaultValue: current) else {
+            item.customIcon = nil // cancelled/blank → reset
+            try? context.save()
+            return
+        }
+        item.customIcon = emoji
+        try? context.save()
     }
 
     private func insert(_ item: StashItem, into stash: Stash) {

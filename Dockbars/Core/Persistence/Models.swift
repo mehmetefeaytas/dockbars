@@ -7,6 +7,7 @@ enum StashItemKind: String, Codable, CaseIterable {
     case url       // website / any openable URL
     case shortcut  // Apple Shortcut, run by name
     case script    // shell script
+    case snippet   // text snippet, copied to the clipboard on open
 }
 
 /// A named collection of pocket items. Phase 1 uses a single default stash;
@@ -39,6 +40,8 @@ final class StashItem {
     var payload: String?
     /// Pinned items sort to the front of their stash.
     var isPinned: Bool = false
+    /// Optional custom icon: an emoji shown instead of the resolved/system icon.
+    var customIcon: String?
     var stash: Stash?
 
     init(displayName: String, urlString: String, bookmarkData: Data? = nil,
