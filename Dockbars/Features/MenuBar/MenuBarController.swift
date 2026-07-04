@@ -1,10 +1,12 @@
 import AppKit
 
-/// Owns the status-bar item and its menu (Toggle Pocket / Settings / Quit).
+/// Owns the status-bar item. Left-click toggles the pocket (a reliable way to
+/// open it regardless of hover); right-click (or Control-click) shows the menu.
 @MainActor
 final class MenuBarController {
     private let statusItem: NSStatusItem
     private let appState: AppState
+    private let menu = NSMenu()
 
     var onTogglePanel: (() -> Void)?
     var onOpenSettings: (() -> Void)?
@@ -13,47 +15,56 @@ final class MenuBarController {
     init(appState: AppState) {
         self.appState = appState
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        configureButton()
         buildMenu()
+        configureButton()
     }
 
     private func configureButton() {
         statusItem.isVisible = true
-        if let button = statusItem.button {
-            let image = NSImage(systemSymbolName: "tray.full.fill", accessibilityDescription: "Dockbars")
-            button.image = image
-            button.image?.isTemplate = true
-            if image == nil { button.title = "▦" } // fallback if the symbol is unavailable
-            NSLog("Dockbars ▸ status item: image=\(image != nil) window=\(button.window != nil) frame=\(button.window.map { NSStringFromRect($0.frame) } ?? "nil")")
-        } else {
+        guard let button = statusItem.button else {
             NSLog("Dockbars ▸ status item has NO button — menu bar may be full")
+            return
         }
+        let image = NSImage(systemSymbolName: "tray.full.fill", accessibilityDescription: "Dockbars")
+        button.image = image
+        button.image?.isTemplate = true
+        if image == nil { button.title = "▦" }
+        button.toolTip = "Dockbars — click to open the pocket, right-click for menu"
+        button.target = self
+        button.action = #selector(statusItemClicked)
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        NSLog("Dockbars ▸ status item ready (image=\(image != nil))")
     }
 
     private func buildMenu() {
-        let menu = NSMenu()
-
-        let toggle = NSMenuItem(title: "Toggle Pocket", action: #selector(toggle), keyEquivalent: "")
+        let toggle = NSMenuItem(title: "Open / Close Pocket", action: #selector(toggle), keyEquivalent: "")
         toggle.target = self
         menu.addItem(toggle)
-
         menu.addItem(.separator())
-
         let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
-
         let tutorial = NSMenuItem(title: "Show Tutorial…", action: #selector(showTutorial), keyEquivalent: "")
         tutorial.target = self
         menu.addItem(tutorial)
-
         menu.addItem(.separator())
-
         let quit = NSMenuItem(title: "Quit Dockbars", action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
+    }
 
-        statusItem.menu = menu
+    @objc private func statusItemClicked() {
+        let event = NSApp.currentEvent
+        let isRight = event?.type == .rightMouseUp
+            || (event?.modifierFlags.contains(.control) ?? false)
+        if isRight {
+            // Show the menu on demand (kept off the status item so left-click works).
+            statusItem.menu = menu
+            statusItem.button?.performClick(nil)
+            statusItem.menu = nil
+        } else {
+            onTogglePanel?()
+        }
     }
 
     @objc private func toggle() { onTogglePanel?() }
