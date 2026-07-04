@@ -8,6 +8,7 @@ struct StashItemView: View {
     let iconSize: CGFloat
     let moveTargets: [Stash]
     var isHighlighted: Bool = false
+    var onDragStart: () -> Void = {}
     let onOpen: () -> Void
     let onReveal: () -> Void
     let onRename: () -> Void
@@ -48,7 +49,10 @@ struct StashItemView: View {
         .onTapGesture { onOpen() }
         .help(item.displayName)
         .onDrag {
-            if let url = item.resolvedURL {
+            onDragStart()
+            // Use the exact stored URL so the trash zone matches reliably; still a
+            // valid file URL for dragging out to Finder.
+            if let url = URL(string: item.urlString) ?? item.resolvedURL {
                 return NSItemProvider(object: url as NSURL)
             }
             return NSItemProvider()

@@ -11,6 +11,9 @@ struct PocketPanelView: View {
 
     @State private var isDropTargeted = false
     @State private var isRemoveTargeted = false
+    /// The item currently being dragged (set when its drag begins), so the trash
+    /// target can remove exactly that item without fragile URL matching.
+    @State private var draggingItemID: PersistentIdentifier?
 
     // Search + highlight live in AppState, driven by the app-level keyboard monitor
     // (keeping keyboard out of SwiftUI focus so it never interferes with drag & drop).
@@ -52,10 +55,19 @@ struct PocketPanelView: View {
                 searchBar
             }
             Divider().opacity(0.4)
-            if filteredItems.isEmpty {
-                emptyState
-            } else {
-                grid
+            // Content area is the add-drop zone (separate from the header's trash
+            // zone so the two never conflict).
+            Group {
+                if filteredItems.isEmpty {
+                    emptyState
+                } else {
+                    grid
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
+                handleAddDrop(providers)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -64,9 +76,6 @@ struct PocketPanelView: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(isDropTargeted ? Color.accentColor : Color.clear, lineWidth: 2)
         )
-        .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
-            handleAddDrop(providers)
-        }
     }
 
     private var searchBar: some View {
@@ -103,8 +112,14 @@ struct PocketPanelView: View {
 
             // Drag an item here to remove it from the stash.
             Image(systemName: isRemoveTargeted ? "trash.fill" : "trash")
+                .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(isRemoveTargeted ? Color.red : Color.secondary)
-                .frame(width: 22, height: 22)
+                .frame(width: 30, height: 26)
+                .background(
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(isRemoveTargeted ? Color.red.opacity(0.18) : Color.primary.opacity(0.06))
+                )
+                .contentShape(Rectangle())
                 .help("Drag an item here to remove it")
                 .onDrop(of: [.fileURL], isTargeted: $isRemoveTargeted) { providers in
                     handleRemoveDrop(providers)
@@ -151,6 +166,7 @@ struct PocketPanelView: View {
                     StashItemView(
                         item: item, iconSize: iconSize, moveTargets: moveTargets,
                         isHighlighted: appState.panelActivated && index == appState.highlightedIndex,
+                        onDragStart: { draggingItemID = item.persistentModelID },
                         onOpen: { open(item) },
                         onReveal: { reveal(item) },
                         onRename: { renameItem(item) },
@@ -269,6 +285,7 @@ struct PocketPanelView: View {
     }
 
     private func handleAddDrop(_ providers: [NSItemProvider]) -> Bool {
+        draggingItemID = nil // dropping on the content area is never a removal
         guard let stash = currentStash else { return false }
         var didAccept = false
         let baseOrder = (stash.items.map(\.order).max() ?? -1) + 1
@@ -286,13 +303,23 @@ struct PocketPanelView: View {
         return didAccept
     }
 
-    /// Removes the item whose URL is dropped onto the trash zone.
+    /// Removes the item dropped onto the trash zone. Uses the item captured when
+    /// its drag began (reliable); falls back to URL matching for external drops.
     private func handleRemoveDrop(_ providers: [NSItemProvider]) -> Bool {
+        defer { draggingItemID = nil }
+        if let id = draggingItemID,
+           let item = sortedItems.first(where: { $0.persistentModelID == id }) {
+            context.delete(item)
+            try? context.save()
+            return true
+        }
         for provider in providers where provider.canLoadObject(ofClass: URL.self) {
             _ = provider.loadObject(ofClass: URL.self) { url, _ in
                 guard let url else { return }
                 Task { @MainActor in
-                    if let item = currentStash?.items.first(where: { $0.urlString == url.absoluteString }) {
+                    if let item = currentStash?.items.first(where: {
+                        $0.urlString == url.absoluteString || $0.resolvedURL?.path == url.path
+                    }) {
                         context.delete(item)
                         try? context.save()
                     }
