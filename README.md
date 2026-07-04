@@ -87,6 +87,33 @@ xcodebuild -project Dockbars.xcodeproj -scheme Dockbars -configuration Debug bui
 xcodebuild -project Dockbars.xcodeproj -scheme Dockbars -destination 'platform=macOS' test
 ```
 
+## Distribution (signing & notarization)
+
+Hardened Runtime is enabled and the entitlements grant no network access, so the app is
+ready for **Developer ID** signing and notarization. This step requires **your** Apple
+credentials (not included in the repo):
+
+1. A **Developer ID Application** certificate in your keychain.
+2. A notarytool profile (one-time):
+   ```bash
+   xcrun notarytool store-credentials dockbars-notary \
+     --apple-id "you@example.com" --team-id TEAMID --password "app-specific-password"
+   ```
+3. Build, sign, notarize and staple:
+   ```bash
+   DEV_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/notarize.sh
+   ```
+
+`scripts/notarize.sh` + `scripts/ExportOptions.plist` automate archive → export → notarize →
+staple. Until you notarize your own build, the app is ad-hoc signed (Gatekeeper will warn,
+and the Accessibility grant resets on each rebuild).
+
+## Auto-update (Sparkle) — planned
+
+Sparkle is not yet integrated. When it is, it will need: the Sparkle SPM package, an EdDSA
+key pair (`generate_keys`), an `SUFeedURL` in Info.plist pointing at your appcast, and a
+hosted `appcast.xml`. All update checks would be opt-in and are the app's only network use.
+
 Or open `Dockbars.xcodeproj` in Xcode and run the **Dockbars** scheme.
 
 ## Architecture
