@@ -44,10 +44,18 @@ struct PocketPanelView: View {
         }
     }
 
-    /// Items after applying the search filter.
+    /// Items after applying the search filter. Empty query → the current stash in
+    /// its natural (pinned-first) order. Non-empty query → fuzzy-ranked results
+    /// across ALL stashes (global search).
     private var filteredItems: [StashItem] {
         guard !searchText.isEmpty else { return sortedItems }
-        return sortedItems.filter { $0.displayName.localizedCaseInsensitiveContains(searchText) }
+        let allItems = stashes.flatMap { $0.items }
+        return allItems
+            .compactMap { item -> (StashItem, Int)? in
+                FuzzyMatch.score(searchText, in: item.displayName).map { (item, $0) }
+            }
+            .sorted { $0.1 > $1.1 }
+            .map { $0.0 }
     }
 
     private var moveTargets: [Stash] {

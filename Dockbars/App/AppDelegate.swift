@@ -309,15 +309,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appState.highlightedIndex = min(max(appState.highlightedIndex + delta, 0), count - 1)
     }
 
-    /// Current stash's items after the search filter (mirrors the panel view).
+    /// Current stash's items after the search filter (mirrors the panel view):
+    /// empty query → current stash (pinned-first); non-empty → fuzzy across all.
     private func filteredItems() -> [StashItem] {
         let context = container.mainContext
         let stashes = (try? context.fetch(FetchDescriptor<Stash>(sortBy: [SortDescriptor(\.order)]))) ?? []
         guard !stashes.isEmpty else { return [] }
-        let index = min(max(appState.selectedStashIndex, 0), stashes.count - 1)
-        let items = stashes[index].items.sorted { $0.order < $1.order }
         let query = appState.searchQuery
-        return query.isEmpty ? items : items.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
+        if query.isEmpty {
+            let index = min(max(appState.selectedStashIndex, 0), stashes.count - 1)
+            return stashes[index].items.sorted { a, b in
+                a.isPinned != b.isPinned ? a.isPinned : a.order < b.order
+            }
+        }
+        return stashes.flatMap { $0.items }
+            .compactMap { item in FuzzyMatch.score(query, in: item.displayName).map { (item, $0) } }
+            .sorted { $0.1 > $1.1 }
+            .map { $0.0 }
     }
 
     private func stashCount() -> Int {
