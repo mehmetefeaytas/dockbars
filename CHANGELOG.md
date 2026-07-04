@@ -4,6 +4,14 @@ All notable changes to Dockbars are documented here.
 
 ## [Unreleased]
 
+### Performance verified + more tests
+
+- **Measured on device (release-like idle):** idle CPU **0.0%** (target <0.5%),
+  memory **~59 MB** (target <80 MB for Phase 4). Under a synthetic 250 events/sec
+  mouse firehose — far heavier than real use — CPU stayed ~2.2%, confirming the
+  allocation-free single-rect hot path. Returns to ~0% when idle.
+- Added `PanelLayoutTests` (adaptive sizing, column fit, cell scaling). 44 tests total.
+
 ### Phase 4 (part 3): CLI, AppleScript, accessibility, docs
 
 **Added**
