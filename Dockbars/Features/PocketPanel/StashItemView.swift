@@ -1,8 +1,8 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
-/// A single pocket cell: icon + truncated label, click to open, drag out to move
-/// the underlying file elsewhere, right-click for the minimal context menu.
+/// A single pocket cell. Rendering is SwiftUI; interaction (click, drag, context
+/// menu) is handled by `DraggableItemView` in AppKit for reliability inside the
+/// non-activating panel. Drag onto the trash or out of the panel to remove.
 struct StashItemView: View {
     let item: StashItem
     let iconSize: CGFloat
@@ -15,8 +15,6 @@ struct StashItemView: View {
     let onMove: (Stash) -> Void
     let onRemove: () -> Void
 
-    @State private var isHovering = false
-
     private var icon: NSImage {
         if let url = item.resolvedURL {
             return IconProvider.icon(for: url, size: iconSize)
@@ -24,7 +22,27 @@ struct StashItemView: View {
         return NSWorkspace.shared.icon(for: .data)
     }
 
+    private var cellSize: CGSize { PanelLayout.cellSize(iconSize: iconSize) }
+
     var body: some View {
+        DraggableItemView(
+            fileURL: URL(string: item.urlString) ?? item.resolvedURL,
+            dragImage: icon,
+            actions: ItemActions(
+                open: onOpen,
+                reveal: onReveal,
+                rename: onRename,
+                remove: onRemove,
+                moveTargets: moveTargets.map { stash in (stash.name, { onMove(stash) }) },
+                dragBegan: onDragStart
+            ),
+            content: AnyView(cell)
+        )
+        .frame(width: cellSize.width, height: cellSize.height)
+        .help(item.displayName)
+    }
+
+    private var cell: some View {
         VStack(spacing: 4) {
             Image(nsImage: icon)
                 .resizable()
@@ -36,40 +54,15 @@ struct StashItemView: View {
                 .frame(maxWidth: iconSize + 20)
         }
         .padding(6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(isHovering ? Color.primary.opacity(0.12) : Color.clear)
+                .fill(isHighlighted ? Color.accentColor.opacity(0.18) : Color.clear)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(isHighlighted ? Color.accentColor : Color.clear, lineWidth: 2)
         )
         .contentShape(Rectangle())
-        .onHover { isHovering = $0 }
-        .onTapGesture { onOpen() }
-        .help(item.displayName)
-        .onDrag {
-            onDragStart()
-            // Use the exact stored URL so the trash zone matches reliably; still a
-            // valid file URL for dragging out to Finder.
-            if let url = URL(string: item.urlString) ?? item.resolvedURL {
-                return NSItemProvider(object: url as NSURL)
-            }
-            return NSItemProvider()
-        }
-        .contextMenu {
-            Button("Open") { onOpen() }
-            Button("Reveal in Finder") { onReveal() }
-            Button("Rename…") { onRename() }
-            if !moveTargets.isEmpty {
-                Menu("Move to Stash") {
-                    ForEach(moveTargets) { stash in
-                        Button(stash.name) { onMove(stash) }
-                    }
-                }
-            }
-            Divider()
-            Button("Remove", role: .destructive) { onRemove() }
-        }
     }
 }
