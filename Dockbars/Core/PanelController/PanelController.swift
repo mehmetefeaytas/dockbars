@@ -86,7 +86,9 @@ final class PanelController {
 
         NSAnimationContext.runAnimationGroup { ctx in
             ctx.duration = animationDuration
-            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            // A slight overshoot (y > 1 on the exit control point) gives the panel
+            // a springy "Dock feel" as it settles into place.
+            ctx.timingFunction = CAMediaTimingFunction(controlPoints: 0.2, 0.9, 0.25, 1.12)
             panel.animator().alphaValue = 1
             panel.animator().setFrame(finalFrame, display: true)
         }

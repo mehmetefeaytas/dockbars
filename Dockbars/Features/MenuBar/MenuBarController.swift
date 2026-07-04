@@ -33,7 +33,13 @@ final class MenuBarController {
         button.target = self
         button.action = #selector(statusItemClicked)
         button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.imagePosition = .imageLeading
         NSLog("Dockbars ▸ status item ready (image=\(image != nil))")
+    }
+
+    /// Shows the active stash name beside the icon (empty hides the label).
+    func updateStashLabel(_ name: String) {
+        statusItem.button?.title = name.isEmpty ? "" : " \(name)"
     }
 
     private func buildMenu() {

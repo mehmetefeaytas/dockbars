@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindowController: SettingsWindowController?
     private var onboardingController: OnboardingController!
     private var settingsCancellable: AnyCancellable?
+    private var stashNameCancellable: AnyCancellable?
     private var keyMonitor: Any?
     private var lastGridColumns = 3
     private var globalHotKey: GlobalHotKey!
@@ -102,6 +103,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController.onShowTutorial = { [weak self] in self?.onboardingController.show() }
 
         observeSettings()
+
+        // Reflect the active stash name in the menu-bar item.
+        stashNameCancellable = appState.$currentStashName
+            .removeDuplicates()
+            .sink { [weak self] name in self?.menuBarController.updateStashLabel(name) }
 
         // Test affordance: seed the pocket at launch when DOCKBARS_SEED_ON_LAUNCH=1.
         if ProcessInfo.processInfo.environment["DOCKBARS_SEED_ON_LAUNCH"] == "1" {

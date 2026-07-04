@@ -18,6 +18,8 @@ final class AppState: ObservableObject {
 
     /// Index of the currently shown stash (Phase 2 multi-stash).
     @Published var selectedStashIndex = 0
+    /// Name of the current stash, mirrored for the menu-bar label.
+    @Published var currentStashName = ""
     /// True when the pocket is a key window (keyboard + search enabled).
     @Published var panelActivated = false
     /// Live search query (driven by the keyboard monitor).

@@ -90,6 +90,13 @@ struct PocketPanelView: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(isDropTargeted ? Color.accentColor : Color.clear, lineWidth: 2)
         )
+        .onAppear { appState.currentStashName = currentStash?.name ?? "" }
+        .onChange(of: appState.selectedStashIndex) { _, _ in
+            appState.currentStashName = currentStash?.name ?? ""
+        }
+        .onChange(of: stashes.map(\.name)) { _, _ in
+            appState.currentStashName = currentStash?.name ?? ""
+        }
     }
 
     private var searchBar: some View {
