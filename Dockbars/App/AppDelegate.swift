@@ -54,6 +54,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Actions the tutorial, Settings, and menu can trigger.
         appState.onTogglePanel = { [weak self] in self?.togglePanel() }
         appState.onShowTutorial = { [weak self] in self?.onboardingController.show() }
+        appState.onOpenSettings = { [weak self] in self?.openSettings() }
         appState.onSeedDefaultApps = { [weak self] in self?.seedDefaultApps() ?? 0 }
 
         menuBarController = MenuBarController(appState: appState)

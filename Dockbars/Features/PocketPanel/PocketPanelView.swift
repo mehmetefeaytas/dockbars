@@ -27,16 +27,17 @@ struct PocketPanelView: View {
     }
 
     var body: some View {
-        ZStack {
-            VisualEffectView(material: .popover)
-
+        VStack(spacing: 0) {
+            header
+            Divider().opacity(0.4)
             if sortedItems.isEmpty {
                 emptyState
             } else {
                 grid
             }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .pocketGlassBackground(cornerRadius: 16)
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .strokeBorder(isDropTargeted ? Color.accentColor : Color.clear, lineWidth: 2)
@@ -44,6 +45,26 @@ struct PocketPanelView: View {
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
             handleDrop(providers)
         }
+    }
+
+    private var header: some View {
+        HStack(spacing: 6) {
+            Text(currentStash?.name ?? "Stash")
+                .font(.headline)
+                .lineLimit(1)
+            Spacer(minLength: 4)
+            Button(action: addViaOpenPanel) {
+                Image(systemName: "plus")
+            }
+            .help("Add apps or files…")
+            Button { appState.onOpenSettings?() } label: {
+                Image(systemName: "gearshape")
+            }
+            .help("Settings")
+        }
+        .buttonStyle(.borderless)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
     }
 
     private var grid: some View {
@@ -61,14 +82,18 @@ struct PocketPanelView: View {
     }
 
     private var emptyState: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 10) {
             Image(systemName: "tray")
                 .font(.system(size: 28))
                 .foregroundStyle(.secondary)
             Text("Drop apps or files here")
                 .font(.callout)
                 .foregroundStyle(.secondary)
+            Button(action: addViaOpenPanel) {
+                Label("Add…", systemImage: "plus")
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
 
@@ -87,6 +112,27 @@ struct PocketPanelView: View {
     private func remove(_ item: StashItem) {
         context.delete(item)
         try? context.save()
+    }
+
+    /// Adds apps/files via a standard open panel (alternative to drag-and-drop).
+    private func addViaOpenPanel() {
+        guard let stash = currentStash else { return }
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = true
+        panel.prompt = "Add"
+        panel.message = "Choose apps or files to add to your pocket"
+        panel.directoryURL = URL(fileURLWithPath: "/Applications")
+
+        // Accessory apps must activate for the panel to come forward.
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK else { return }
+
+        let baseOrder = (stash.items.map(\.order).max() ?? -1) + 1
+        for (offset, url) in panel.urls.enumerated() {
+            addItem(url: url, to: stash, order: baseOrder + offset)
+        }
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {

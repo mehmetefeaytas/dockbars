@@ -19,6 +19,7 @@ final class AppState: ObservableObject {
     // Actions wired by AppDelegate so SwiftUI views and menus can drive behavior.
     var onTogglePanel: (() -> Void)?
     var onShowTutorial: (() -> Void)?
+    var onOpenSettings: (() -> Void)?
     var onSeedDefaultApps: (() -> Int)?
 
     init(settings: SettingsStore, container: ModelContainer) {

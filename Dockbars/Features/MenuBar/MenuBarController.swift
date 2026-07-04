@@ -18,9 +18,15 @@ final class MenuBarController {
     }
 
     private func configureButton() {
+        statusItem.isVisible = true
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "tray.full", accessibilityDescription: "Dockbars")
+            let image = NSImage(systemSymbolName: "tray.full.fill", accessibilityDescription: "Dockbars")
+            button.image = image
             button.image?.isTemplate = true
+            if image == nil { button.title = "▦" } // fallback if the symbol is unavailable
+            NSLog("Dockbars ▸ status item: image=\(image != nil) window=\(button.window != nil) frame=\(button.window.map { NSStringFromRect($0.frame) } ?? "nil")")
+        } else {
+            NSLog("Dockbars ▸ status item has NO button — menu bar may be full")
         }
     }
 

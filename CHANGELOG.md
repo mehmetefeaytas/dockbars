@@ -4,6 +4,23 @@ All notable changes to Dockbars are documented here.
 
 ## [Unreleased]
 
+### Liquid Glass, easy adding & panel header
+
+**Added**
+- **Liquid Glass** background for the pocket (`pocketGlassBackground` → SwiftUI
+  `glassEffect` on macOS 26 Tahoe, `NSVisualEffectView` fallback on macOS 15).
+- **Panel header** with the stash name plus two controls: **+** (opens an
+  `NSOpenPanel` to add apps/files — an explicit alternative to drag-and-drop) and a
+  **gear** that opens Settings. The empty state also shows an "Add…" button.
+- **Menu-bar icon hardening** — `statusItem.isVisible = true`, filled `tray.full.fill`
+  symbol, text fallback if the symbol is missing, and a startup log of the button state.
+  Clicking the menu-bar icon shows the menu (Toggle Pocket / Settings / Show Tutorial / Quit);
+  Settings is now also one click away from the panel header.
+
+**Notes**
+- Two ways to add items: drag-and-drop, or the **+** button (file picker).
+- Two ways to reach Settings: the menu-bar icon's menu, or the panel-header gear.
+
 ### Onboarding, settings & Dock-adjacent placement
 
 **Added**
