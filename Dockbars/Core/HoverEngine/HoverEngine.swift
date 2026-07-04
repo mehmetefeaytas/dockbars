@@ -11,7 +11,8 @@ import AppKit
 final class HoverEngine {
     private var globalMonitor: Any?
     private var localMonitor: Any?
-    private var cachedTriggerZone: CGRect = .zero
+    /// Trigger strips, one per screen (multi-monitor). Pointer in any opens.
+    private var cachedTriggerZones: [CGRect] = []
     private var closeWorkItem: DispatchWorkItem?
     private let debouncer: HoverDebouncer
 
@@ -37,8 +38,8 @@ final class HoverEngine {
 
     var isOpen: Bool { debouncer.isOpen }
 
-    func updateTriggerZone(_ zone: CGRect) {
-        cachedTriggerZone = zone
+    func updateTriggerZones(_ zones: [CGRect]) {
+        cachedTriggerZones = zones
     }
 
     func updateCloseDelay(_ delay: TimeInterval) {
@@ -87,7 +88,8 @@ final class HoverEngine {
         guard !isSuspended else { return }
         let location = NSEvent.mouseLocation // cheap property, global bottom-left coords
         let inPanel = debouncer.isOpen && (panelFrameProvider?()?.contains(location) ?? false)
-        let inside = cachedTriggerZone.contains(location) || inPanel
+        let inTrigger = cachedTriggerZones.contains { $0.contains(location) }
+        let inside = inTrigger || inPanel
 
         // Promote to a key window the moment the pointer enters the open panel.
         if inPanel && !wasInPanel { onEnteredPanel?() }

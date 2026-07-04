@@ -17,6 +17,8 @@ struct StashItemView: View {
     let onRemove: () -> Void
     var onTogglePin: () -> Void = {}
 
+    @State private var peekTask: Task<Void, Never>?
+
     private var icon: NSImage {
         ItemLauncher.icon(for: item, size: iconSize)
     }
@@ -43,6 +45,19 @@ struct StashItemView: View {
                height: listStyle ? max(iconSize * 0.6, 28) : cellSize.height)
         .frame(maxWidth: listStyle ? .infinity : nil)
         .help(item.displayName)
+        .onHover { hovering in
+            peekTask?.cancel()
+            guard hovering, item.kind == .file, let url = item.resolvedURL,
+                  FileManager.default.fileExists(atPath: url.path) else {
+                return
+            }
+            // Quick Peek: preview after a 1s dwell.
+            peekTask = Task {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                guard !Task.isCancelled else { return }
+                QuickLookPreview.shared.show(url)
+            }
+        }
     }
 
     @ViewBuilder

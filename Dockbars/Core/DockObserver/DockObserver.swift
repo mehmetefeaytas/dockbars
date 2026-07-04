@@ -50,6 +50,16 @@ final class DockObserver {
 
     /// Reads the live Dock configuration. Works without App Sandbox.
     static func readDockInfo() -> DockInfo {
+        readDockInfo(for: NSScreen.main ?? NSScreen.screens.first)
+    }
+
+    /// The screen currently containing the pointer, for multi-monitor placement.
+    static func screenUnderPointer() -> NSScreen? {
+        let location = NSEvent.mouseLocation
+        return NSScreen.screens.first { $0.frame.contains(location) } ?? NSScreen.main
+    }
+
+    static func readDockInfo(for screen: NSScreen?) -> DockInfo {
         let dockDefaults = UserDefaults(suiteName: "com.apple.dock")
         let orientationRaw = dockDefaults?.string(forKey: "orientation") ?? "bottom"
         let orientation = DockInfo.Orientation(rawValue: orientationRaw) ?? .bottom
@@ -57,11 +67,14 @@ final class DockObserver {
         let tileSize = dockDefaults?.object(forKey: "tilesize") as? Double ?? 48
         let autohide = dockDefaults?.bool(forKey: "autohide") ?? false
 
-        let screen = NSScreen.main ?? NSScreen.screens.first
         guard let screen else { return .fallback }
 
         let primary = NSScreen.screens.first?.frame ?? screen.frame
-        let dockFrame = DockFrameReader.currentDockFrame(primaryScreen: primary)
+        // The Dock's AX frame is in primary-screen coordinates; only trust it when
+        // the target screen is the primary one, otherwise fall back to an estimate.
+        let dockFrame = (screen == NSScreen.screens.first)
+            ? DockFrameReader.currentDockFrame(primaryScreen: primary)
+            : nil
 
         return DockInfo(
             orientation: orientation,

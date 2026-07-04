@@ -159,10 +159,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Geometry
 
     /// Resolves the current placement from settings + Dock state + item count.
-    private func currentPlacement() -> DockGeometry.PlacementResult {
+    /// Uses the given Dock info, defaulting to the app's cached (main-screen) one.
+    private func currentPlacement(dockInfo: DockInfo? = nil) -> DockGeometry.PlacementResult {
         DockGeometry.placement(
             mode: appState.settings.placementMode,
-            dockInfo: appState.dockInfo,
+            dockInfo: dockInfo ?? appState.dockInfo,
             preferredEdge: appState.settings.preferredEdge,
             iconSize: CGFloat(appState.settings.iconSize),
             itemCount: currentItemCount(),
@@ -182,8 +183,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func refreshGeometry() {
         let placement = currentPlacement()
         appState.resolvedEdge = placement.edge
-        hoverEngine.updateTriggerZone(placement.triggerZone)
+
+        // Multi-monitor: a trigger strip on every screen (each computed from that
+        // screen's own Dock info), so the pocket can be summoned on any display.
+        let zones = NSScreen.screens.map { screen in
+            currentPlacement(dockInfo: DockObserver.readDockInfo(for: screen)).triggerZone
+        }
+        hoverEngine.updateTriggerZones(zones.isEmpty ? [placement.triggerZone] : zones)
         dragTriggerWindow.update(frame: placement.triggerZone)
+
         panelController.configure(edge: placement.edge, size: placement.size)
         panelController.applyAppearance(appState.settings.theme.appearance)
         lastGridColumns = max(1, PanelLayout.columnsThatFit(width: placement.size.width,
@@ -199,7 +207,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func openPanel() {
         let activated = pendingActivated
         pendingActivated = false
-        let placement = currentPlacement()
+        // Place on the screen the pointer is on (multi-monitor).
+        let dockInfo = DockObserver.readDockInfo(for: DockObserver.screenUnderPointer())
+        let placement = currentPlacement(dockInfo: dockInfo)
         appState.resolvedEdge = placement.edge
         panelController.show(edge: placement.edge, origin: placement.origin,
                              size: placement.size, reduceMotion: reduceMotion, activated: activated)
