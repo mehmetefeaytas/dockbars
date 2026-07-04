@@ -26,6 +26,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Handle dockbars:// URLs (e.g. dockbars://open?stash=Work).
+        NSAppleEventManager.shared().setEventHandler(
+            self, andSelector: #selector(handleURLEvent(_:withReplyEvent:)),
+            forEventClass: AEEventClass(kInternetEventClass), andEventID: AEEventID(kAEGetURL))
+
         container = PersistenceController.makeContainer()
         PersistenceController.ensureDefaultStash(in: container.mainContext)
 
@@ -318,6 +323,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func stashCount() -> Int {
         let context = container.mainContext
         return (try? context.fetchCount(FetchDescriptor<Stash>())) ?? 0
+    }
+
+    // MARK: - URL scheme (dockbars://)
+
+    @objc private func handleURLEvent(_ event: NSAppleEventDescriptor, withReplyEvent: NSAppleEventDescriptor) {
+        guard let string = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
+              let url = URLComponents(string: string) else { return }
+        // dockbars://open, dockbars://open?stash=Work, dockbars://toggle
+        switch url.host {
+        case "toggle":
+            togglePanel()
+        case "open":
+            if let stashName = url.queryItems?.first(where: { $0.name == "stash" })?.value {
+                selectStash(named: stashName)
+            }
+            pendingActivated = true
+            hoverEngine.requestOpen()
+        default:
+            break
+        }
+    }
+
+    private func selectStash(named name: String) {
+        let stashes = (try? container.mainContext.fetch(FetchDescriptor<Stash>(sortBy: [SortDescriptor(\.order)]))) ?? []
+        if let index = stashes.firstIndex(where: { $0.name.caseInsensitiveCompare(name) == .orderedSame }) {
+            appState.selectedStashIndex = index
+        }
     }
 
     // MARK: - Export / Import

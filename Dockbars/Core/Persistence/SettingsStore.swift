@@ -19,6 +19,7 @@ final class SettingsStore: ObservableObject {
         static let useListView = "useListView"
         static let showRecent = "showRecent"
         static let clipboardHistory = "clipboardHistory"
+        static let showWidgets = "showWidgets"
     }
 
     private let defaults: UserDefaults
@@ -68,6 +69,10 @@ final class SettingsStore: ObservableObject {
     @Published var clipboardHistory: Bool {
         didSet { defaults.set(clipboardHistory, forKey: Keys.clipboardHistory) }
     }
+    /// Show the widgets strip (clock, battery, recent downloads).
+    @Published var showWidgets: Bool {
+        didSet { defaults.set(showWidgets, forKey: Keys.showWidgets) }
+    }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -82,5 +87,6 @@ final class SettingsStore: ObservableObject {
         useListView = defaults.bool(forKey: Keys.useListView)
         showRecent = defaults.bool(forKey: Keys.showRecent)
         clipboardHistory = defaults.bool(forKey: Keys.clipboardHistory)
+        showWidgets = defaults.bool(forKey: Keys.showWidgets)
     }
 }

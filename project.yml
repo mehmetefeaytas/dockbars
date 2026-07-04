@@ -28,6 +28,9 @@ targets:
         CFBundleDisplayName: Dockbars
         LSMinimumSystemVersion: "15.0"
         NSHumanReadableCopyright: "© 2026 Dockbars. All data stays local."
+        CFBundleURLTypes:
+          - CFBundleURLName: com.acmgedik.dockbars
+            CFBundleURLSchemes: [dockbars]
         NSAccessibilityUsageDescription: "Dockbars needs Accessibility access to detect when your pointer reaches the Dock edge and to read the Dock's position, so the hidden pocket can open in the right place."
     settings:
       base:

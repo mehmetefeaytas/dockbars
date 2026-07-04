@@ -201,6 +201,9 @@ struct PocketPanelView: View {
             if appState.settings.showRecent && !recents.records.isEmpty {
                 recentSection
             }
+            if appState.settings.showWidgets {
+                WidgetsView()
+            }
             if appState.settings.clipboardHistory && !appState.clipboard.entries.isEmpty {
                 clipboardSection
             }

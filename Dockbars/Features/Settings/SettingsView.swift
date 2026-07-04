@@ -73,6 +73,7 @@ struct SettingsView: View {
                 Toggle("Show recently used", isOn: $settings.showRecent)
                 Toggle("Show running apps", isOn: $settings.showRunningApps)
                 Toggle("Clipboard history", isOn: $settings.clipboardHistory)
+                Toggle("Show widgets", isOn: $settings.showWidgets)
             }
 
             Section("Getting Started") {
