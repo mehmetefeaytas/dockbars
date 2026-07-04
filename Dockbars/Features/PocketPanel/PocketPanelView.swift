@@ -204,7 +204,8 @@ struct PocketPanelView: View {
                         onMove: { moveItem(item, to: $0) },
                         onRemove: { remove(item) },
                         onTogglePin: { togglePin(item) },
-                        onSetIcon: { setCustomIcon(item) }
+                        onSetIcon: { setCustomIcon(item) },
+                        onDropReorder: { reorderDragged(before: item) }
                     )
                 }
             }
@@ -351,6 +352,24 @@ struct PocketPanelView: View {
     private func togglePin(_ item: StashItem) {
         item.isPinned.toggle()
         try? context.save()
+    }
+
+    /// Moves the item currently being dragged to just before `target`, then
+    /// renumbers the stash so `order` stays contiguous. No-op during a search.
+    @discardableResult
+    private func reorderDragged(before target: StashItem) -> Bool {
+        guard searchText.isEmpty, let id = draggingItemID, id != target.persistentModelID,
+              let dragged = sortedItems.first(where: { $0.persistentModelID == id }),
+              dragged.stash?.persistentModelID == target.stash?.persistentModelID else { return false }
+
+        var ordered = sortedItems
+        ordered.removeAll { $0.persistentModelID == id }
+        guard let targetIndex = ordered.firstIndex(where: { $0.persistentModelID == target.persistentModelID }) else { return false }
+        ordered.insert(dragged, at: targetIndex)
+        for (index, item) in ordered.enumerated() { item.order = index }
+        try? context.save()
+        draggingItemID = nil
+        return true
     }
 
     private func moveItem(_ item: StashItem, to stash: Stash) {

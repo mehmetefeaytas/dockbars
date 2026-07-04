@@ -12,6 +12,9 @@ struct ItemActions {
     var togglePin: () -> Void = {}
     var setIcon: () -> Void = {}
     var dragBegan: () -> Void = {}
+    /// Called when another item is dropped onto this one — reorder before it.
+    /// Returns true if a reorder was performed (i.e. it was an internal drag).
+    var dropReorder: () -> Bool = { false }
 }
 
 /// Hosts a SwiftUI cell but drives interaction from AppKit, because SwiftUI's
@@ -60,9 +63,32 @@ final class DragSourceView: NSView, NSDraggingSource {
         self.actions = actions
     }
 
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        registerForDraggedTypes([.fileURL]) // accept item drags for reordering
+    }
+
     // The SwiftUI content is display-only; claim any event within our tree.
     override func hitTest(_ point: NSPoint) -> NSView? {
         super.hitTest(point) != nil ? self : nil
+    }
+
+    // MARK: - Drop target (reorder)
+
+    override func draggingEntered(_ sender: any NSDraggingInfo) -> NSDragOperation {
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.controlAccentColor.withAlphaComponent(0.25).cgColor
+        layer?.cornerRadius = 10
+        return .move
+    }
+
+    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
+        layer?.backgroundColor = nil
+    }
+
+    override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
+        layer?.backgroundColor = nil
+        return actions?.dropReorder() ?? false
     }
 
     override var acceptsFirstResponder: Bool { true }
