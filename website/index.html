@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dockbars — the hidden pocket for your Dock</title>
+  <meta name="description" content="A native macOS hidden Dock pocket. Hover the screen edge and a Liquid Glass panel of your apps, files and snippets slides out. Local-first. No telemetry." />
+  <meta property="og:title" content="Dockbars — the hidden pocket for your Dock" />
+  <meta property="og:description" content="Hover the edge, a glass pocket slides out. Native macOS. Local-first, no telemetry." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#0B0A1F" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%97%84%EF%B8%8F%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Dockbars home">
+      <span class="brand-glyph" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <rect x="2.5" y="6" width="19" height="12" rx="3.2" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="7" cy="12" r="1.4" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.4" fill="currentColor"/>
+          <circle cx="17" cy="12" r="1.4" fill="currentColor"/>
+        </svg>
+      </span>
+      <span>Dockbars</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#how" data-i18n="nav.how">How it works</a>
+      <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
+    </nav>
+
+    <div class="nav-right">
+      <div class="lang" role="group" aria-label="Language">
+        <button data-lang="en" type="button">EN</button>
+        <button data-lang="tr" type="button">TR</button>
+        <button data-lang="de" type="button">DE</button>
+        <button data-lang="es" type="button">ES</button>
+      </div>
+      <a class="btn btn-ghost" href="https://github.com/mehmetefeaytas/dockbars" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow" data-i18n="hero.eyebrow">Native macOS · Local-first</p>
+        <h1 class="hero-title" data-i18n="hero.title">A hidden pocket for your Dock.</h1>
+        <p class="hero-sub" data-i18n="hero.sub">Push your pointer to the edge and a Liquid Glass panel slides out — your apps, files and snippets, one flick away. It extends the Dock. It never replaces it.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://github.com/mehmetefeaytas/dockbars" target="_blank" rel="noopener" data-i18n="hero.ctaPrimary">Get it on GitHub</a>
+          <button class="btn btn-ghost" type="button" id="replayBtn" data-i18n="hero.ctaSecondary">Replay the demo</button>
+        </div>
+        <ul class="hero-pills">
+          <li data-i18n="hero.pill1">No network</li>
+          <li data-i18n="hero.pill2">No telemetry</li>
+          <li data-i18n="hero.pill3">Zero third-party code</li>
+        </ul>
+      </div>
+
+      <!-- SIGNATURE: the pocket sliding out of the Dock -->
+      <div class="stage" aria-hidden="true">
+        <div class="screen">
+          <div class="menubar">
+            <span class="mb-dot"></span>
+            <span class="mb-spacer"></span>
+            <span class="mb-tray">🗄️</span>
+            <span class="mb-clock" id="mbClock">9:41</span>
+          </div>
+
+          <div class="pocket" id="pocket">
+            <div class="pocket-head">
+              <span class="pocket-title" data-i18n="mock.stash">Stash</span>
+              <span class="pocket-tools"><span>＋</span><span>⚙</span></span>
+            </div>
+            <div class="pocket-grid">
+              <span>🧭</span><span>✉️</span><span>🎵</span>
+              <span>📝</span><span>⚙️</span><span>📁</span>
+              <span>🖥️</span><span>🗓️</span><span>🧮</span>
+            </div>
+          </div>
+
+          <div class="trigger" id="trigger" title="Hover here"></div>
+
+          <div class="dock">
+            <span>🧭</span><span>✉️</span><span>🎵</span><span>📷</span>
+            <span>🗺️</span><span>🎨</span><span>🧩</span><span>🗑️</span>
+          </div>
+        </div>
+        <p class="stage-hint" data-i18n="mock.hint">Hover the corner beside the Dock</p>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <p class="eyebrow center" data-i18n="features.eyebrow">Everything, one flick away</p>
+      <h2 class="section-title" data-i18n="features.title">Built for people who live in the Dock.</h2>
+      <div class="grid">
+        <article class="card">
+          <div class="card-icon">🫙</div>
+          <h3 data-i18n="feat.stashes.t">Unlimited stashes</h3>
+          <p data-i18n="feat.stashes.d">Group apps and files into named stashes — Work, Dev, Games. Switch with ⌘1–9.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">⌨️</div>
+          <h3 data-i18n="feat.search.t">Search &amp; keyboard</h3>
+          <p data-i18n="feat.search.d">Start typing to fuzzy-search across every stash. Arrow keys and Return, no mouse needed.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🧩</div>
+          <h3 data-i18n="feat.types.t">More than apps</h3>
+          <p data-i18n="feat.types.d">Files, folders, websites, Shortcuts, shell scripts and text snippets — each opens the right way.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🪟</div>
+          <h3 data-i18n="feat.glass.t">Liquid Glass</h3>
+          <p data-i18n="feat.glass.d">A translucent panel that feels native on macOS 26, with System, Light and Dark themes.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🖥️</div>
+          <h3 data-i18n="feat.multi.t">Multi-monitor</h3>
+          <p data-i18n="feat.multi.d">The pocket opens on the screen your pointer is on, beside that display's Dock.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">⚡</div>
+          <h3 data-i18n="feat.fast.t">Featherweight</h3>
+          <p data-i18n="feat.fast.d">A single cached rect-test on pointer move. Idle CPU near zero, memory in tens of MB.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">📋</div>
+          <h3 data-i18n="feat.extras.t">Widgets &amp; clipboard</h3>
+          <p data-i18n="feat.extras.d">Clock, battery and recent Downloads at a glance, plus an optional local clipboard history.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🚀</div>
+          <h3 data-i18n="feat.auto.t">Automation</h3>
+          <p data-i18n="feat.auto.d">Open a stash from anywhere with ⌥Space, the dockbars:// URL scheme, or the CLI.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">🔒</div>
+          <h3 data-i18n="feat.privacy.t">Yours alone</h3>
+          <p data-i18n="feat.privacy.d">Everything stays on your Mac. No accounts, no network, no analytics — by design.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section">
+      <p class="eyebrow center" data-i18n="how.eyebrow">Three moves</p>
+      <h2 class="section-title" data-i18n="how.title">It works the way the Dock already does.</h2>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-n">1</span>
+          <h3 data-i18n="how.s1.t">Reach the edge</h3>
+          <p data-i18n="how.s1.d">Move your pointer to the corner beside the Dock. A thin trigger strip is all it takes.</p>
+        </li>
+        <li class="step">
+          <span class="step-n">2</span>
+          <h3 data-i18n="how.s2.t">The pocket slides out</h3>
+          <p data-i18n="how.s2.d">A glass panel springs open without stealing focus from whatever you were doing.</p>
+        </li>
+        <li class="step">
+          <span class="step-n">3</span>
+          <h3 data-i18n="how.s3.t">Open, or move on</h3>
+          <p data-i18n="how.s3.d">Click to launch, drag to add or remove, or just glide away — it closes on its own.</p>
+        </li>
+      </ol>
+    </section>
+
+    <!-- PRIVACY -->
+    <section id="privacy" class="privacy">
+      <div class="privacy-inner">
+        <p class="eyebrow" data-i18n="privacy.eyebrow">Privacy is the default</p>
+        <h2 class="privacy-title" data-i18n="privacy.title">Local-first, not local-when-convenient.</h2>
+        <p class="privacy-sub" data-i18n="privacy.sub">Dockbars has no network code. Your stashes, clipboard history and statistics never leave your Mac — there is nothing to opt out of, because there is nothing sending anything.</p>
+        <div class="kbd-row">
+          <span class="kbd">⌥</span><span class="kbd">Space</span>
+          <span class="kbd-label" data-i18n="privacy.kbd">Summon the pocket from anywhere</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-brand">
+      <span class="brand-glyph" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <rect x="2.5" y="6" width="19" height="12" rx="3.2" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="7" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="17" cy="12" r="1.4" fill="currentColor"/>
+        </svg>
+      </span>
+      Dockbars
+    </div>
+    <p class="footer-note" data-i18n="footer.note">Native macOS · Local-first · Open source</p>
+    <div class="lang lang-footer" role="group" aria-label="Language">
+      <button data-lang="en" type="button">EN</button>
+      <button data-lang="tr" type="button">TR</button>
+      <button data-lang="de" type="button">DE</button>
+      <button data-lang="es" type="button">ES</button>
+    </div>
+  </footer>
+
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
