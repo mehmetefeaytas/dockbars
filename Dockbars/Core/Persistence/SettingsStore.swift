@@ -18,6 +18,7 @@ final class SettingsStore: ObservableObject {
         static let showRunningApps = "showRunningApps"
         static let useListView = "useListView"
         static let showRecent = "showRecent"
+        static let clipboardHistory = "clipboardHistory"
     }
 
     private let defaults: UserDefaults
@@ -63,6 +64,10 @@ final class SettingsStore: ObservableObject {
     @Published var showRecent: Bool {
         didSet { defaults.set(showRecent, forKey: Keys.showRecent) }
     }
+    /// Keep a local clipboard history and show it in the pocket.
+    @Published var clipboardHistory: Bool {
+        didSet { defaults.set(clipboardHistory, forKey: Keys.clipboardHistory) }
+    }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -76,5 +81,6 @@ final class SettingsStore: ObservableObject {
         showRunningApps = defaults.bool(forKey: Keys.showRunningApps)
         useListView = defaults.bool(forKey: Keys.useListView)
         showRecent = defaults.bool(forKey: Keys.showRecent)
+        clipboardHistory = defaults.bool(forKey: Keys.clipboardHistory)
     }
 }

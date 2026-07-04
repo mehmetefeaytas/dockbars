@@ -88,6 +88,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appState.onShowTutorial = { [weak self] in self?.onboardingController.show() }
         appState.onOpenSettings = { [weak self] in self?.openSettings() }
         appState.onSeedDefaultApps = { [weak self] in self?.seedDefaultApps() ?? 0 }
+        appState.onExportConfig = { [weak self] in self?.exportConfig() }
+        appState.onImportConfig = { [weak self] in self?.importConfig() }
 
         menuBarController = MenuBarController(appState: appState)
         menuBarController.onTogglePanel = { [weak self] in self?.togglePanel() }
@@ -318,6 +320,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return (try? context.fetchCount(FetchDescriptor<Stash>())) ?? 0
     }
 
+    // MARK: - Export / Import
+
+    private func exportConfig() {
+        guard let data = ConfigCodec.export(from: container.mainContext) else { return }
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "Dockbars.json"
+        panel.allowedContentTypes = [.json]
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        try? data.write(to: url)
+    }
+
+    private func importConfig() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.allowsMultipleSelection = false
+        NSApp.activate(ignoringOtherApps: true)
+        guard panel.runModal() == .OK, let url = panel.url, let data = try? Data(contentsOf: url) else { return }
+
+        let alert = NSAlert()
+        alert.messageText = "Import Configuration"
+        alert.informativeText = "Replace your current stashes, or merge the imported ones in?"
+        alert.addButton(withTitle: "Replace")
+        alert.addButton(withTitle: "Merge")
+        alert.addButton(withTitle: "Cancel")
+        let response = alert.runModal()
+        guard response != .alertThirdButtonReturn else { return }
+        let replace = (response == .alertFirstButtonReturn)
+        ConfigCodec.import(data, into: container.mainContext, replace: replace)
+        appState.selectedStashIndex = 0
+        refreshGeometry()
+    }
+
     // MARK: - Settings
 
     private func openSettings() {
@@ -329,12 +364,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func observeSettings() {
+        appState.clipboard.setEnabled(appState.settings.clipboardHistory)
         // React to any settings change: re-derive geometry and push the delay.
         settingsCancellable = appState.settings.objectWillChange
             .sink { [weak self] in
                 DispatchQueue.main.async {
                     guard let self else { return }
                     self.hoverEngine.updateCloseDelay(self.appState.settings.closeDelay)
+                    self.appState.clipboard.setEnabled(self.appState.settings.clipboardHistory)
                     self.refreshGeometry()
                 }
             }

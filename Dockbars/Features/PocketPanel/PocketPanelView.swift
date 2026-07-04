@@ -11,6 +11,7 @@ struct PocketPanelView: View {
 
     @StateObject private var runningApps = RunningAppsMonitor()
     @ObservedObject private var recents = RecentTracker.shared
+    @ObservedObject private var stats = StatsStore.shared
     @State private var isDropTargeted = false
     @State private var isRemoveTargeted = false
     /// The item currently being dragged (set when its drag begins), so the trash
@@ -200,9 +201,41 @@ struct PocketPanelView: View {
             if appState.settings.showRecent && !recents.records.isEmpty {
                 recentSection
             }
+            if appState.settings.clipboardHistory && !appState.clipboard.entries.isEmpty {
+                clipboardSection
+            }
             if appState.settings.showRunningApps && !runningApps.apps.isEmpty {
                 runningSection
             }
+        }
+    }
+
+    private var clipboardSection: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Divider().opacity(0.4)
+            HStack {
+                Text("Clipboard")
+                    .font(.caption).bold().foregroundStyle(.secondary)
+                Spacer()
+                Button("Clear") { appState.clipboard.clear() }
+                    .buttonStyle(.borderless).font(.caption2)
+            }
+            .padding(.horizontal, PanelLayout.padding)
+            ForEach(Array(appState.clipboard.entries.prefix(10).enumerated()), id: \.offset) { _, text in
+                Button {
+                    appState.clipboard.copyToPasteboard(text)
+                } label: {
+                    Text(text)
+                        .font(.caption)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, PanelLayout.padding)
+                .help("Click to copy")
+            }
+            .padding(.bottom, 4)
         }
     }
 
@@ -280,6 +313,7 @@ struct PocketPanelView: View {
 
     private func open(_ item: StashItem) {
         RecentTracker.shared.record(item)
+        StatsStore.shared.record(item)
         ItemLauncher.open(item)
     }
 

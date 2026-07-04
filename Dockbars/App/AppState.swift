@@ -25,11 +25,16 @@ final class AppState: ObservableObject {
     /// Highlighted item index for keyboard navigation.
     @Published var highlightedIndex = 0
 
+    /// Shared clipboard history monitor (enabled per settings).
+    let clipboard = ClipboardMonitor()
+
     // Actions wired by AppDelegate so SwiftUI views and menus can drive behavior.
     var onTogglePanel: (() -> Void)?
     var onShowTutorial: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onSeedDefaultApps: (() -> Int)?
+    var onExportConfig: (() -> Void)?
+    var onImportConfig: (() -> Void)?
 
     init(settings: SettingsStore, container: ModelContainer) {
         self.settings = settings

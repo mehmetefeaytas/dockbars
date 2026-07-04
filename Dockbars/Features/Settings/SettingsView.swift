@@ -72,6 +72,7 @@ struct SettingsView: View {
                 Toggle("List view", isOn: $settings.useListView)
                 Toggle("Show recently used", isOn: $settings.showRecent)
                 Toggle("Show running apps", isOn: $settings.showRunningApps)
+                Toggle("Clipboard history", isOn: $settings.clipboardHistory)
             }
 
             Section("Getting Started") {
@@ -93,6 +94,37 @@ struct SettingsView: View {
                 }
                 if let seedMessage {
                     Text(seedMessage).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+
+            Section("Data") {
+                Button {
+                    appState.onExportConfig?()
+                } label: {
+                    Label("Export Configuration…", systemImage: "square.and.arrow.up")
+                }
+                Button {
+                    appState.onImportConfig?()
+                } label: {
+                    Label("Import Configuration…", systemImage: "square.and.arrow.down")
+                }
+            }
+
+            Section("Most Opened") {
+                let top = StatsStore.shared.top(10)
+                if top.isEmpty {
+                    Text("No opens recorded yet.")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else {
+                    ForEach(Array(top.enumerated()), id: \.offset) { _, entry in
+                        HStack {
+                            Text(entry.name).lineLimit(1)
+                            Spacer()
+                            Text("\(entry.count)×").monospacedDigit().foregroundStyle(.secondary)
+                        }
+                    }
+                    Button("Clear Statistics") { StatsStore.shared.clear() }
+                        .font(.caption)
                 }
             }
 
