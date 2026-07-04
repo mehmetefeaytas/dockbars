@@ -64,10 +64,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         installKeyboardMonitor()
 
-        // Global shortcut (⌥Space) to toggle the pocket from anywhere.
+        // Global shortcut (default ⌥Space, user-customizable) to toggle from anywhere.
         globalHotKey = GlobalHotKey()
         globalHotKey.onFire = { [weak self] in self?.togglePanel() }
-        globalHotKey.register()
+        registerHotKey()
 
         // Suspend hover detection while a fullscreen app is frontmost.
         fullscreenMonitor = FullscreenMonitor()
@@ -405,15 +405,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func observeSettings() {
         appState.clipboard.setEnabled(appState.settings.clipboardHistory)
-        // React to any settings change: re-derive geometry and push the delay.
+        // React to any settings change: re-derive geometry, push the delay, and
+        // re-register the (possibly changed) global shortcut.
         settingsCancellable = appState.settings.objectWillChange
             .sink { [weak self] in
                 DispatchQueue.main.async {
                     guard let self else { return }
                     self.hoverEngine.updateCloseDelay(self.appState.settings.closeDelay)
                     self.appState.clipboard.setEnabled(self.appState.settings.clipboardHistory)
+                    self.registerHotKey()
                     self.refreshGeometry()
                 }
             }
+    }
+
+    private var lastHotKey: (Int, Int)?
+    private func registerHotKey() {
+        let code = appState.settings.hotKeyCode
+        let mods = appState.settings.hotKeyModifiers
+        guard lastHotKey == nil || lastHotKey! != (code, mods) else { return } // avoid churn
+        lastHotKey = (code, mods)
+        globalHotKey.register(keyCode: UInt32(code), modifiers: UInt32(mods))
     }
 }

@@ -20,6 +20,8 @@ final class SettingsStore: ObservableObject {
         static let showRecent = "showRecent"
         static let clipboardHistory = "clipboardHistory"
         static let showWidgets = "showWidgets"
+        static let hotKeyCode = "hotKeyCode"
+        static let hotKeyModifiers = "hotKeyModifiers"
     }
 
     private let defaults: UserDefaults
@@ -73,6 +75,13 @@ final class SettingsStore: ObservableObject {
     @Published var showWidgets: Bool {
         didSet { defaults.set(showWidgets, forKey: Keys.showWidgets) }
     }
+    /// Global shortcut: virtual key code + Carbon modifier flags. Default ⌥Space.
+    @Published var hotKeyCode: Int {
+        didSet { defaults.set(hotKeyCode, forKey: Keys.hotKeyCode) }
+    }
+    @Published var hotKeyModifiers: Int {
+        didSet { defaults.set(hotKeyModifiers, forKey: Keys.hotKeyModifiers) }
+    }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -88,5 +97,8 @@ final class SettingsStore: ObservableObject {
         showRecent = defaults.bool(forKey: Keys.showRecent)
         clipboardHistory = defaults.bool(forKey: Keys.clipboardHistory)
         showWidgets = defaults.bool(forKey: Keys.showWidgets)
+        // Default ⌥Space (kVK_Space = 49, optionKey = 2048).
+        hotKeyCode = (defaults.object(forKey: Keys.hotKeyCode) as? Int) ?? 49
+        hotKeyModifiers = (defaults.object(forKey: Keys.hotKeyModifiers) as? Int) ?? 2048
     }
 }

@@ -68,6 +68,13 @@ struct SettingsView: View {
                         .monospacedDigit()
                         .frame(width: 48, alignment: .trailing)
                 }
+                HStack {
+                    Text("Global shortcut")
+                    Spacer()
+                    ShortcutRecorder(keyCode: $settings.hotKeyCode,
+                                     carbonModifiers: $settings.hotKeyModifiers)
+                        .frame(width: 130, height: 26)
+                }
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
                 Toggle("List view", isOn: $settings.useListView)
                 Toggle("Show recently used", isOn: $settings.showRecent)
