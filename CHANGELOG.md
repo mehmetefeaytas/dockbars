@@ -4,6 +4,22 @@ All notable changes to Dockbars are documented here.
 
 ## [Unreleased]
 
+### Phase 4 (part 3): CLI, AppleScript, accessibility, docs
+
+**Added**
+- **CLI wrapper** `scripts/dockbars` over the URL scheme (`dockbars open [stash]`,
+  `dockbars toggle`).
+- **AppleScript** support documented via the URL scheme
+  (`do shell script "open 'dockbars://open?stash=Work'"`).
+- **Accessibility**: VoiceOver labels/hints on pocket items (button trait, "Opens …")
+  and the header add / trash controls.
+- README documents opening methods, automation, and the Sparkle appcast placeholder.
+
+**Notes**
+- A full AppleScript `.sdef` (custom verbs) is deferred; the URL-scheme path is the
+  supported automation surface and works today.
+- Sparkle auto-update integration is deferred (appcast URL is a placeholder), per plan.
+
 ### Fixes — keyboard now works after hover; drag & drop restored
 
 **Fixed**

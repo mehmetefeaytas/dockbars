@@ -1,0 +1,29 @@
+#!/bin/bash
+# Dockbars CLI — a thin wrapper over the dockbars:// URL scheme.
+#
+# Install:  cp scripts/dockbars /usr/local/bin/dockbars && chmod +x /usr/local/bin/dockbars
+# Usage:
+#   dockbars open            # open the pocket
+#   dockbars open <stash>    # open a specific stash by name
+#   dockbars toggle          # toggle the pocket
+set -euo pipefail
+
+cmd="${1:-open}"
+case "$cmd" in
+  open)
+    if [ $# -ge 2 ]; then
+      # URL-encode the stash name minimally (spaces).
+      stash="${2// /%20}"
+      open "dockbars://open?stash=${stash}"
+    else
+      open "dockbars://open"
+    fi
+    ;;
+  toggle)
+    open "dockbars://toggle"
+    ;;
+  *)
+    echo "Usage: dockbars {open [stash] | toggle}" >&2
+    exit 1
+    ;;
+esac

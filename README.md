@@ -8,9 +8,44 @@ of the Dock, not a replacement for it.
 
 ## Status
 
-**Phase 1 (MVP) — in progress.** Buildable skeleton with Dock detection, hover-driven
-panel, drag-and-drop stash, menu bar item, and settings. See [CHANGELOG.md](CHANGELOG.md)
-and the phased roadmap below.
+**Phases 1–4 implemented.** Hidden Dock pocket with hover + menu-bar + global-shortcut
+opening, multiple stashes, search & keyboard navigation, extended item types, themes,
+recents/pins, Quick Peek, multi-monitor, widgets, clipboard history, statistics, JSON
+export/import, and `dockbars://` automation. See [CHANGELOG.md](CHANGELOG.md).
+
+### Opening the pocket
+
+- **Hover** the trigger strip (default: bottom-left, beside the Dock). Move into the panel
+  to enable keyboard/search.
+- **Click** the menu-bar icon (right-click for the menu).
+- **Global shortcut** ⌥Space.
+- **URL / CLI**: `open dockbars://open` or `dockbars open`.
+
+### Automation
+
+`dockbars://` URL scheme:
+
+```
+dockbars://open              # open the pocket
+dockbars://open?stash=Work   # select "Work" and open
+dockbars://toggle            # toggle
+```
+
+CLI wrapper (`scripts/dockbars`, install to `/usr/local/bin`):
+
+```bash
+dockbars open
+dockbars open Work
+dockbars toggle
+```
+
+AppleScript (via the URL scheme):
+
+```applescript
+do shell script "open 'dockbars://open?stash=Work'"
+```
+
+Auto-update via **Sparkle** is planned; the appcast URL is a placeholder until then.
 
 ## Privacy
 

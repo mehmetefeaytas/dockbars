@@ -45,6 +45,10 @@ struct StashItemView: View {
                height: listStyle ? max(iconSize * 0.6, 28) : cellSize.height)
         .frame(maxWidth: listStyle ? .infinity : nil)
         .help(item.displayName)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(item.displayName)
+        .accessibilityHint("Opens \(item.displayName)")
+        .accessibilityAddTraits(.isButton)
         .onHover { hovering in
             peekTask?.cancel()
             guard hovering, item.kind == .file, let url = item.resolvedURL,

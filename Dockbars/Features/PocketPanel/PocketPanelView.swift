@@ -122,6 +122,7 @@ struct PocketPanelView: View {
             .menuIndicator(.hidden)
             .fixedSize()
             .help("Add apps, files, a URL, a Shortcut, or a script")
+            .accessibilityLabel("Add item")
 
             // Drag an item here to remove it from the stash.
             Image(systemName: isRemoveTargeted ? "trash.fill" : "trash")
@@ -134,6 +135,7 @@ struct PocketPanelView: View {
                 )
                 .contentShape(Rectangle())
                 .help("Drag an item here to remove it")
+                .accessibilityLabel("Remove item drop target")
                 .onDrop(of: [.fileURL], isTargeted: $isRemoveTargeted) { providers in
                     handleRemoveDrop(providers)
                 }
