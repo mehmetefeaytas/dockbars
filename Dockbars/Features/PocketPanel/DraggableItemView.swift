@@ -120,13 +120,13 @@ final class DragSourceView: NSView, NSDraggingSource {
     override func rightMouseDown(with event: NSEvent) {
         guard let actions else { return }
         let menu = NSMenu()
-        add(menu, "Open", #selector(doOpen))
-        add(menu, "Reveal in Finder", #selector(doReveal))
-        add(menu, actions.isPinned ? "Unpin" : "Pin", #selector(doTogglePin))
-        add(menu, "Rename…", #selector(doRename))
-        add(menu, "Set Icon…", #selector(doSetIcon))
+        add(menu, L("Open"), #selector(doOpen))
+        add(menu, L("Reveal in Finder"), #selector(doReveal))
+        add(menu, actions.isPinned ? L("Unpin") : L("Pin"), #selector(doTogglePin))
+        add(menu, L("Rename…"), #selector(doRename))
+        add(menu, L("Set Icon…"), #selector(doSetIcon))
         if !actions.moveTargets.isEmpty {
-            let move = NSMenuItem(title: "Move to Stash", action: nil, keyEquivalent: "")
+            let move = NSMenuItem(title: L("Move to Stash"), action: nil, keyEquivalent: "")
             let submenu = NSMenu()
             for (index, target) in actions.moveTargets.enumerated() {
                 let mi = NSMenuItem(title: target.name, action: #selector(doMove(_:)), keyEquivalent: "")
@@ -138,7 +138,7 @@ final class DragSourceView: NSView, NSDraggingSource {
             menu.addItem(move)
         }
         menu.addItem(.separator())
-        add(menu, "Remove", #selector(doRemove))
+        add(menu, L("Remove"), #selector(doRemove))
         NSMenu.popUpContextMenu(menu, with: event, for: self)
     }
 

@@ -1,0 +1,5 @@
+/* Dockbars — English base localization. Keys equal their English text, so this
+   file is largely an identity map; it anchors "en" as a supported localization. */
+"Stash" = "Stash";
+"No matches for “%@”" = "No matches for “%@”";
+"Move to Stash" = "Move to Stash";

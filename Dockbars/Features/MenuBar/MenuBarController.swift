@@ -47,7 +47,7 @@ final class MenuBarController {
 
     private func buildMenu() {
         menu.removeAllItems()
-        let toggle = NSMenuItem(title: "Open / Close Pocket", action: #selector(toggle), keyEquivalent: "")
+        let toggle = NSMenuItem(title: L("Open / Close Pocket"), action: #selector(toggle), keyEquivalent: "")
         toggle.target = self
         menu.addItem(toggle)
 
@@ -55,23 +55,23 @@ final class MenuBarController {
         menu.addItem(profileMenuItem())
 
         menu.addItem(.separator())
-        let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        let settings = NSMenuItem(title: L("Settings…"), action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
         menu.addItem(settings)
-        let tutorial = NSMenuItem(title: "Show Tutorial…", action: #selector(showTutorial), keyEquivalent: "")
+        let tutorial = NSMenuItem(title: L("Show Tutorial…"), action: #selector(showTutorial), keyEquivalent: "")
         tutorial.target = self
         menu.addItem(tutorial)
         menu.addItem(.separator())
-        let quit = NSMenuItem(title: "Quit Dockbars", action: #selector(quit), keyEquivalent: "q")
+        let quit = NSMenuItem(title: L("Quit Dockbars"), action: #selector(quit), keyEquivalent: "q")
         quit.target = self
         menu.addItem(quit)
     }
 
     private func profileMenuItem() -> NSMenuItem {
-        let root = NSMenuItem(title: "Profile", action: nil, keyEquivalent: "")
+        let root = NSMenuItem(title: L("Profile"), action: nil, keyEquivalent: "")
         let sub = NSMenu()
 
-        let none = NSMenuItem(title: "None", action: #selector(chooseNoProfile), keyEquivalent: "")
+        let none = NSMenuItem(title: L("None"), action: #selector(chooseNoProfile), keyEquivalent: "")
         none.target = self
         none.state = appState.profiles.activeName == nil ? .on : .off
         sub.addItem(none)
@@ -86,11 +86,11 @@ final class MenuBarController {
         }
 
         sub.addItem(.separator())
-        let save = NSMenuItem(title: "Save Current as Profile…", action: #selector(saveProfile), keyEquivalent: "")
+        let save = NSMenuItem(title: L("Save Current as Profile…"), action: #selector(saveProfile), keyEquivalent: "")
         save.target = self
         sub.addItem(save)
         if let active = appState.profiles.activeName {
-            let del = NSMenuItem(title: "Delete “\(active)”", action: #selector(deleteActiveProfile), keyEquivalent: "")
+            let del = NSMenuItem(title: String(format: L("Delete “%@”"), active), action: #selector(deleteActiveProfile), keyEquivalent: "")
             del.target = self
             del.representedObject = active
             sub.addItem(del)

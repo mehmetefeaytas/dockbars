@@ -380,8 +380,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func saveProfile() {
-        guard let name = InputPrompt.string(title: "Save Profile",
-                                            message: "Name this profile (e.g. Work, Meeting)") else { return }
+        guard let name = InputPrompt.string(title: L("Save Profile"),
+                                            message: L("Name this profile (e.g. Work, Meeting)")) else { return }
         appState.profiles.save(Profile(name: name, settings: appState.settings.snapshot()))
         appState.profiles.setActive(name)
     }
@@ -406,11 +406,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard panel.runModal() == .OK, let url = panel.url, let data = try? Data(contentsOf: url) else { return }
 
         let alert = NSAlert()
-        alert.messageText = "Import Configuration"
-        alert.informativeText = "Replace your current stashes, or merge the imported ones in?"
-        alert.addButton(withTitle: "Replace")
-        alert.addButton(withTitle: "Merge")
-        alert.addButton(withTitle: "Cancel")
+        alert.messageText = L("Import Configuration")
+        alert.informativeText = L("Replace your current stashes, or merge the imported ones in?")
+        alert.addButton(withTitle: L("Replace"))
+        alert.addButton(withTitle: L("Merge"))
+        alert.addButton(withTitle: L("Cancel"))
         let response = alert.runModal()
         guard response != .alertThirdButtonReturn else { return }
         let replace = (response == .alertFirstButtonReturn)

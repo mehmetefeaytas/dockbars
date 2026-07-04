@@ -1,0 +1,102 @@
+/* Dockbars — Türkçe yerelleştirme. Anahtarlar İngilizce metinlerdir. */
+
+/* --- Panel & öğeler --- */
+"Stash" = "Stash";
+"Add item" = "Öğe ekle";
+"Remove item drop target" = "Kaldırma bırakma hedefi";
+"Add apps, files, a URL, a Shortcut, or a script" = "Uygulama, dosya, URL, Kısayol veya script ekle";
+"Add Files…" = "Dosya Ekle…";
+"Add URL…" = "URL Ekle…";
+"Add Shortcut…" = "Kısayol Ekle…";
+"Add Script…" = "Script Ekle…";
+"Add Snippet…" = "Parçacık Ekle…";
+"Add…" = "Ekle…";
+"Drop apps or files here" = "Uygulama veya dosyaları buraya bırakın";
+"No matches for “%@”" = "“%@” için eşleşme yok";
+"Drag an item here to remove it" = "Kaldırmak için bir öğeyi buraya sürükleyin";
+"Click to copy" = "Kopyalamak için tıklayın";
+"Recently used" = "Son kullanılanlar";
+"Clipboard" = "Pano";
+"Running" = "Çalışan";
+"Recent Downloads" = "Son İndirilenler";
+"Clear" = "Temizle";
+
+/* --- Ayarlar --- */
+"Placement" = "Yerleşim";
+"Edge" = "Kenar";
+"Which screen edge the pocket opens from. Options depend on your Dock position." = "Cebin hangi ekran kenarından açılacağı. Seçenekler Dock konumunuza bağlıdır.";
+"Theme" = "Tema";
+"Icon size" = "İkon boyutu";
+"Close delay" = "Kapanma gecikmesi";
+"Trigger width" = "Tetik genişliği";
+"Global shortcut" = "Global kısayol";
+"Launch at login" = "Girişte başlat";
+"List view" = "Liste görünümü";
+"Show recently used" = "Son kullanılanları göster";
+"Show running apps" = "Çalışan uygulamaları göster";
+"Clipboard history" = "Pano geçmişi";
+"Show widgets" = "Widget'ları göster";
+"Show Tutorial" = "Öğreticiyi Göster";
+"Open Pocket Now" = "Cebi Şimdi Aç";
+"Add Common Apps" = "Yaygın Uygulamaları Ekle";
+"Export Configuration…" = "Yapılandırmayı Dışa Aktar…";
+"Import Configuration…" = "Yapılandırmayı İçe Aktar…";
+"Clear Statistics" = "İstatistikleri Temizle";
+"No opens recorded yet." = "Henüz açma kaydı yok.";
+"Open Settings" = "Ayarları Aç";
+
+/* --- Onboarding / bölüm başlıkları (SwiftUI) --- */
+"Open System Settings" = "Sistem Ayarlarını Aç";
+"You can change this anytime in Settings." = "Bunu istediğiniz zaman Ayarlar'dan değiştirebilirsiniz.";
+"Get Started" = "Başla";
+"Back" = "Geri";
+"Next" = "İleri";
+"Access granted — you're all set." = "Erişim verildi — hazırsınız.";
+
+/* --- Menü çubuğu & bağlam menüsü (AppKit) --- */
+"Open / Close Pocket" = "Cebi Aç / Kapat";
+"Settings…" = "Ayarlar…";
+"Show Tutorial…" = "Öğreticiyi Göster…";
+"Quit Dockbars" = "Dockbars'tan Çık";
+"Dockbars Settings" = "Dockbars Ayarları";
+"Profile" = "Profil";
+"None" = "Yok";
+"Save Current as Profile…" = "Geçerliyi Profil Olarak Kaydet…";
+"Delete “%@”" = "“%@” profilini sil";
+"Open" = "Aç";
+"Reveal in Finder" = "Finder'da Göster";
+"Pin" = "Sabitle";
+"Unpin" = "Sabitlemeyi Kaldır";
+"Rename…" = "Yeniden Adlandır…";
+"Set Icon…" = "İkon Ayarla…";
+"Move to Stash" = "Stash'e Taşı";
+"Remove" = "Kaldır";
+
+/* --- Diyaloglar / istemler (AppKit) --- */
+"OK" = "Tamam";
+"Cancel" = "İptal";
+"Replace" = "Değiştir";
+"Merge" = "Birleştir";
+"Choose apps or files to add to your pocket" = "Cebinize eklemek için uygulama veya dosya seçin";
+"Add" = "Ekle";
+"Add URL" = "URL Ekle";
+"Enter a web address" = "Bir web adresi girin";
+"Add Shortcut" = "Kısayol Ekle";
+"Enter the exact Shortcut name" = "Kısayolun tam adını girin";
+"Add Script" = "Script Ekle";
+"Name this script" = "Bu script'e ad verin";
+"Script for “%@”" = "“%@” için script";
+"Shell command to run" = "Çalıştırılacak shell komutu";
+"Add Snippet" = "Parçacık Ekle";
+"Name this snippet" = "Bu parçacığa ad verin";
+"Snippet “%@”" = "“%@” parçacığı";
+"Text to copy when clicked" = "Tıklanınca kopyalanacak metin";
+"Rename Item" = "Öğeyi Yeniden Adlandır";
+"Set Icon" = "İkon Ayarla";
+"Enter an emoji (blank to reset)" = "Bir emoji girin (sıfırlamak için boş bırakın)";
+"New Stash" = "Yeni Stash";
+"Rename Stash" = "Stash'i Yeniden Adlandır";
+"Save Profile" = "Profili Kaydet";
+"Name this profile (e.g. Work, Meeting)" = "Bu profile ad verin (örn. İş, Toplantı)";
+"Import Configuration" = "Yapılandırmayı İçe Aktar";
+"Replace your current stashes, or merge the imported ones in?" = "Mevcut stash'lerinizi değiştirin mi, yoksa içe aktarılanları birleştirin mi?";

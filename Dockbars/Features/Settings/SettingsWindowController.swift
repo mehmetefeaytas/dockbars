@@ -11,7 +11,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
             .environmentObject(appState)
         let hosting = NSHostingController(rootView: root)
         let window = NSWindow(contentViewController: hosting)
-        window.title = "Dockbars Settings"
+        window.title = L("Dockbars Settings")
         window.styleMask = [.titled, .closable]
         window.isReleasedWhenClosed = false
         self.init(window: window)

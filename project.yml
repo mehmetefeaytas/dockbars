@@ -5,6 +5,7 @@ options:
     macOS: "15.0"
   createIntermediateGroups: true
   developmentLanguage: en
+  knownRegions: [en, tr, Base]
 
 settings:
   base:
@@ -28,6 +29,8 @@ targets:
         CFBundleDisplayName: Dockbars
         LSMinimumSystemVersion: "15.0"
         NSHumanReadableCopyright: "© 2026 Dockbars. All data stays local."
+        CFBundleDevelopmentRegion: en
+        CFBundleLocalizations: [en, tr]
         CFBundleURLTypes:
           - CFBundleURLName: com.acmgedik.dockbars
             CFBundleURLSchemes: [dockbars]

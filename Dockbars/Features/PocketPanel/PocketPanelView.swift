@@ -351,7 +351,7 @@ struct PocketPanelView: View {
     }
 
     private func renameItem(_ item: StashItem) {
-        guard let name = InputPrompt.string(title: "Rename Item", defaultValue: item.displayName) else { return }
+        guard let name = InputPrompt.string(title: L("Rename Item"), defaultValue: item.displayName) else { return }
         item.displayName = name
         try? context.save()
     }
@@ -388,7 +388,7 @@ struct PocketPanelView: View {
     // MARK: - Stash actions
 
     private func newStash() {
-        guard let name = InputPrompt.string(title: "New Stash") else { return }
+        guard let name = InputPrompt.string(title: L("New Stash")) else { return }
         let order = (stashes.map(\.order).max() ?? -1) + 1
         context.insert(Stash(name: name, order: order))
         try? context.save()
@@ -397,7 +397,7 @@ struct PocketPanelView: View {
 
     private func renameStash() {
         guard let stash = currentStash,
-              let name = InputPrompt.string(title: "Rename Stash", defaultValue: stash.name) else { return }
+              let name = InputPrompt.string(title: L("Rename Stash"), defaultValue: stash.name) else { return }
         stash.name = name
         try? context.save()
     }
@@ -418,8 +418,8 @@ struct PocketPanelView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
-        panel.prompt = "Add"
-        panel.message = "Choose apps or files to add to your pocket"
+        panel.prompt = L("Add")
+        panel.message = L("Choose apps or files to add to your pocket")
         panel.directoryURL = URL(fileURLWithPath: "/Applications")
 
         NSApp.activate(ignoringOtherApps: true)
@@ -433,7 +433,7 @@ struct PocketPanelView: View {
 
     private func addURL() {
         guard let stash = currentStash,
-              let input = InputPrompt.string(title: "Add URL", message: "Enter a web address", defaultValue: "https://") else { return }
+              let input = InputPrompt.string(title: L("Add URL"), message: L("Enter a web address"), defaultValue: "https://") else { return }
         var text = input
         if !text.contains("://") { text = "https://" + text }
         guard let url = URL(string: text) else { return }
@@ -443,27 +443,27 @@ struct PocketPanelView: View {
 
     private func addShortcut() {
         guard let stash = currentStash,
-              let name = InputPrompt.string(title: "Add Shortcut", message: "Enter the exact Shortcut name") else { return }
+              let name = InputPrompt.string(title: L("Add Shortcut"), message: L("Enter the exact Shortcut name")) else { return }
         insert(StashItem(displayName: name, urlString: "dockbars-shortcut:\(name)", kind: .shortcut, payload: name), into: stash)
     }
 
     private func addScript() {
         guard let stash = currentStash,
-              let name = InputPrompt.string(title: "Add Script", message: "Name this script") else { return }
-        guard let body = InputPrompt.string(title: "Script for “\(name)”", message: "Shell command to run") else { return }
+              let name = InputPrompt.string(title: L("Add Script"), message: L("Name this script")) else { return }
+        guard let body = InputPrompt.string(title: String(format: L("Script for “%@”"), name), message: L("Shell command to run")) else { return }
         insert(StashItem(displayName: name, urlString: "dockbars-script:\(name)", kind: .script, payload: body), into: stash)
     }
 
     private func addSnippet() {
         guard let stash = currentStash,
-              let name = InputPrompt.string(title: "Add Snippet", message: "Name this snippet") else { return }
-        guard let text = InputPrompt.string(title: "Snippet “\(name)”", message: "Text to copy when clicked") else { return }
+              let name = InputPrompt.string(title: L("Add Snippet"), message: L("Name this snippet")) else { return }
+        guard let text = InputPrompt.string(title: String(format: L("Snippet “%@”"), name), message: L("Text to copy when clicked")) else { return }
         insert(StashItem(displayName: name, urlString: "dockbars-snippet:\(name)", kind: .snippet, payload: text), into: stash)
     }
 
     private func setCustomIcon(_ item: StashItem) {
         let current = item.customIcon ?? ""
-        guard let emoji = InputPrompt.string(title: "Set Icon", message: "Enter an emoji (blank to reset)", defaultValue: current) else {
+        guard let emoji = InputPrompt.string(title: L("Set Icon"), message: L("Enter an emoji (blank to reset)"), defaultValue: current) else {
             item.customIcon = nil // cancelled/blank → reset
             try? context.save()
             return

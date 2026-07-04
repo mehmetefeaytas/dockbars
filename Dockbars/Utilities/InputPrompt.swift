@@ -9,8 +9,8 @@ enum InputPrompt {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = message
-        alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Cancel")
+        alert.addButton(withTitle: L("OK"))
+        alert.addButton(withTitle: L("Cancel"))
 
         let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
         field.stringValue = defaultValue
