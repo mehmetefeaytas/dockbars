@@ -1,0 +1,219 @@
+- generic [active] [ref=f3e1]:
+  - banner [ref=f3e3]:
+    - link "Dockbars home" [ref=f3e4] [cursor=pointer]:
+      - /url: "#top"
+      - img [ref=f3e6]
+      - generic [ref=f3e11]: Dockbars
+    - navigation "Primary" [ref=f3e12]:
+      - link "Features" [ref=f3e13] [cursor=pointer]:
+        - /url: "#features"
+      - link "How it works" [ref=f3e14] [cursor=pointer]:
+        - /url: "#how"
+      - link "Privacy" [ref=f3e15] [cursor=pointer]:
+        - /url: "#privacy"
+    - generic [ref=f3e16]:
+      - group "Language" [ref=f3e17]:
+        - button "EN" [pressed] [ref=f3e18] [cursor=pointer]
+        - button "TR" [ref=f3e19] [cursor=pointer]
+        - button "DE" [ref=f3e20] [cursor=pointer]
+        - button "ES" [ref=f3e21] [cursor=pointer]
+      - link "GitHub" [ref=f3e22] [cursor=pointer]:
+        - /url: https://github.com/mehmetefeaytas/dockbars
+  - main [ref=f3e23]:
+    - generic [ref=f3e24]:
+      - generic [ref=f3e25]:
+        - paragraph [ref=f3e26]: Native macOS · Local-first
+        - heading "A hidden pocket for your Dock." [level=1] [ref=f3e27]
+        - paragraph [ref=f3e28]: Push your pointer to the edge and a Liquid Glass panel slides out — your apps, files and snippets, one flick away. It extends the Dock. It never replaces it.
+        - generic [ref=f3e29]:
+          - link "Get it on GitHub" [ref=f3e30] [cursor=pointer]:
+            - /url: https://github.com/mehmetefeaytas/dockbars
+          - button "Replay the demo" [ref=f3e31] [cursor=pointer]
+        - list [ref=f3e32]:
+          - listitem [ref=f3e33]: ✓ No network
+          - listitem [ref=f3e34]: ✓ No telemetry
+          - listitem [ref=f3e35]: ✓ Zero third-party code
+      - generic [ref=f3e36]:
+        - generic [ref=f3e37]:
+          - generic [ref=f3e38]:
+            - generic [ref=f3e40]: 🗄️
+            - generic [ref=f3e41]: 23:48
+          - generic [ref=f3e42]:
+            - generic [ref=f3e43]:
+              - generic [ref=f3e44]: Stash
+              - generic [ref=f3e45]:
+                - generic [ref=f3e46]: ＋
+                - generic [ref=f3e47]: ⚙
+            - generic [ref=f3e48]:
+              - generic [ref=f3e49]: 🧭
+              - generic [ref=f3e50]: ✉️
+              - generic [ref=f3e51]: 🎵
+              - generic [ref=f3e52]: 📝
+              - generic [ref=f3e53]: ⚙️
+              - generic [ref=f3e54]: 📁
+              - generic [ref=f3e55]: 🖥️
+              - generic [ref=f3e56]: 🗓️
+              - generic [ref=f3e57]: 🧮
+          - generic [ref=f3e59]:
+            - generic [ref=f3e60]: 🧭
+            - generic [ref=f3e61]: ✉️
+            - generic [ref=f3e62]: 🎵
+            - generic [ref=f3e63]: 📷
+            - generic [ref=f3e64]: 🗺️
+            - generic [ref=f3e65]: 🎨
+            - generic [ref=f3e66]: 🧩
+            - generic [ref=f3e67]: 🗑️
+        - paragraph [ref=f3e68]: Hover the corner beside the Dock
+    - region "At a glance" [ref=f3e69]:
+      - generic [ref=f3e70]:
+        - generic [ref=f3e71]: 🍎
+        - generic [ref=f3e72]: macOS 15 Sequoia or later
+      - generic [ref=f3e73]:
+        - generic [ref=f3e74]: 🧠
+        - generic [ref=f3e75]: Apple Silicon & Intel
+      - generic [ref=f3e76]:
+        - generic [ref=f3e77]: ⚡
+        - generic [ref=f3e78]: Native Swift — no Electron
+      - generic [ref=f3e79]:
+        - generic [ref=f3e80]: 🆓
+        - generic [ref=f3e81]: Free & open source
+    - generic [ref=f3e82]:
+      - paragraph [ref=f3e83]: Everything, one flick away
+      - heading "Built for people who live in the Dock." [level=2] [ref=f3e84]
+      - generic [ref=f3e85]:
+        - article [ref=f3e86]:
+          - generic [ref=f3e87]: 🫙
+          - heading "Unlimited stashes" [level=3] [ref=f3e88]
+          - paragraph [ref=f3e89]: Group apps and files into named stashes — Work, Dev, Games. Switch with ⌘1–9.
+        - article [ref=f3e90]:
+          - generic [ref=f3e91]: ⌨️
+          - heading "Search & keyboard" [level=3] [ref=f3e92]
+          - paragraph [ref=f3e93]: Start typing to fuzzy-search across every stash. Arrow keys and Return, no mouse needed.
+        - article [ref=f3e94]:
+          - generic [ref=f3e95]: 🧩
+          - heading "More than apps" [level=3] [ref=f3e96]
+          - paragraph [ref=f3e97]: Files, folders, websites, Shortcuts, shell scripts and text snippets — each opens the right way.
+        - article [ref=f3e98]:
+          - generic [ref=f3e99]: 🪟
+          - heading "Liquid Glass" [level=3] [ref=f3e100]
+          - paragraph [ref=f3e101]: A translucent panel that feels native on macOS 26, with System, Light and Dark themes.
+        - article [ref=f3e102]:
+          - generic [ref=f3e103]: 🖥️
+          - heading "Multi-monitor" [level=3] [ref=f3e104]
+          - paragraph [ref=f3e105]: The pocket opens on the screen your pointer is on, beside that display's Dock.
+        - article [ref=f3e106]:
+          - generic [ref=f3e107]: ⚡
+          - heading "Featherweight" [level=3] [ref=f3e108]
+          - paragraph [ref=f3e109]: A single cached rect-test on pointer move. Idle CPU near zero, memory in tens of MB.
+        - article [ref=f3e110]:
+          - generic [ref=f3e111]: 📋
+          - heading "Widgets & clipboard" [level=3] [ref=f3e112]
+          - paragraph [ref=f3e113]: Clock, battery and recent Downloads at a glance, plus an optional local clipboard history.
+        - article [ref=f3e114]:
+          - generic [ref=f3e115]: 🚀
+          - heading "Automation" [level=3] [ref=f3e116]
+          - paragraph [ref=f3e117]: Open a stash from anywhere with ⌥Space, the dockbars:// URL scheme, or the CLI.
+        - article [ref=f3e118]:
+          - generic [ref=f3e119]: 🔒
+          - heading "Yours alone" [level=3] [ref=f3e120]
+          - paragraph [ref=f3e121]: Everything stays on your Mac. No accounts, no network, no analytics — by design.
+    - generic [ref=f3e122]:
+      - paragraph [ref=f3e123]: Three moves
+      - heading "It works the way the Dock already does." [level=2] [ref=f3e124]
+      - list [ref=f3e125]:
+        - listitem [ref=f3e126]:
+          - generic [ref=f3e127]: "1"
+          - heading "Reach the edge" [level=3] [ref=f3e128]
+          - paragraph [ref=f3e129]: Move your pointer to the corner beside the Dock. A thin trigger strip is all it takes.
+        - listitem [ref=f3e130]:
+          - generic [ref=f3e131]: "2"
+          - heading "The pocket slides out" [level=3] [ref=f3e132]
+          - paragraph [ref=f3e133]: A glass panel springs open without stealing focus from whatever you were doing.
+        - listitem [ref=f3e134]:
+          - generic [ref=f3e135]: "3"
+          - heading "Open, or move on" [level=3] [ref=f3e136]
+          - paragraph [ref=f3e137]: Click to launch, drag to add or remove, or just glide away — it closes on its own.
+    - generic [ref=f3e138]:
+      - generic [ref=f3e139]:
+        - paragraph [ref=f3e140]: Keyboard-first
+        - heading "Never touch the mouse if you don't want to." [level=2] [ref=f3e141]
+        - paragraph [ref=f3e142]: Open the pocket, start typing, and fuzzy search ranks matches across every stash. Arrow keys move the selection, Return opens, ⌘1–9 jump between stashes.
+        - generic [ref=f3e143]:
+          - generic [ref=f3e144]: Type to search
+          - generic [ref=f3e145]: Arrows + Return
+          - generic [ref=f3e146]: ⌘1–9 stashes
+      - generic [ref=f3e148]:
+        - generic [ref=f3e149]:
+          - generic [ref=f3e150]: 🔎
+          - generic [ref=f3e151]: saf
+        - generic [ref=f3e153]:
+          - generic [ref=f3e154]: 🧭
+          - text: Safari
+        - generic [ref=f3e155]:
+          - generic [ref=f3e156]: ⚙️
+          - text: System Settings
+        - generic [ref=f3e157]:
+          - generic [ref=f3e158]: 📁
+          - text: Shared Files
+        - generic [ref=f3e159]:
+          - generic [ref=f3e160]: ↑↓
+          - generic [ref=f3e161]: ↩
+          - generic [ref=f3e162]: ⌘1–9
+    - generic [ref=f3e163]:
+      - paragraph [ref=f3e164]: Questions
+      - heading "Good to know." [level=2] [ref=f3e165]
+      - generic [ref=f3e166]:
+        - group [ref=f3e167]:
+          - generic "Does Dockbars replace the Dock? +" [ref=f3e168] [cursor=pointer]
+        - group [ref=f3e169]:
+          - generic "Why does it need Accessibility access? +" [ref=f3e170] [cursor=pointer]
+        - group [ref=f3e171]:
+          - generic "Does any data leave my Mac? +" [ref=f3e172] [cursor=pointer]
+        - group [ref=f3e173]:
+          - generic "Which Macs are supported? +" [ref=f3e174] [cursor=pointer]
+    - generic [ref=f3e176]:
+      - paragraph [ref=f3e177]: Privacy is the default
+      - heading "Local-first, not local-when-convenient." [level=2] [ref=f3e178]
+      - paragraph [ref=f3e179]: Dockbars has no network code. Your stashes, clipboard history and statistics never leave your Mac — there is nothing to opt out of, because there is nothing sending anything.
+      - generic [ref=f3e180]:
+        - generic [ref=f3e181]: ⌥
+        - generic [ref=f3e182]: Space
+        - generic [ref=f3e183]: Summon the pocket from anywhere
+    - generic [ref=f3e184]:
+      - paragraph [ref=f3e185]: Get started
+      - heading "Bring your Dock to life." [level=2] [ref=f3e186]
+      - paragraph [ref=f3e187]: Free, open source and local-first. Build from source or grab a release on GitHub.
+      - link "Download on GitHub" [ref=f3e188] [cursor=pointer]:
+        - /url: https://github.com/mehmetefeaytas/dockbars
+      - paragraph [ref=f3e189]: Requires macOS 15 Sequoia or later
+  - contentinfo [ref=f3e190]:
+    - generic [ref=f3e191]:
+      - generic [ref=f3e192]:
+        - generic [ref=f3e193]:
+          - img [ref=f3e195]
+          - text: Dockbars
+        - paragraph [ref=f3e200]: The hidden pocket for your Dock.
+        - group "Language" [ref=f3e201]:
+          - button "EN" [pressed] [ref=f3e202] [cursor=pointer]
+          - button "TR" [ref=f3e203] [cursor=pointer]
+          - button "DE" [ref=f3e204] [cursor=pointer]
+          - button "ES" [ref=f3e205] [cursor=pointer]
+      - navigation "Product" [ref=f3e206]:
+        - heading "Product" [level=4] [ref=f3e207]
+        - link "Features" [ref=f3e208] [cursor=pointer]:
+          - /url: "#features"
+        - link "How it works" [ref=f3e209] [cursor=pointer]:
+          - /url: "#how"
+        - link "Privacy" [ref=f3e210] [cursor=pointer]:
+          - /url: "#privacy"
+        - link "Questions" [ref=f3e211] [cursor=pointer]:
+          - /url: "#faq"
+      - navigation "Resources" [ref=f3e212]:
+        - heading "Resources" [level=4] [ref=f3e213]
+        - link "GitHub" [ref=f3e214] [cursor=pointer]:
+          - /url: https://github.com/mehmetefeaytas/dockbars
+        - link "Changelog" [ref=f3e215] [cursor=pointer]:
+          - /url: https://github.com/mehmetefeaytas/dockbars/blob/main/CHANGELOG.md
+    - generic [ref=f3e216]:
+      - generic [ref=f3e217]: Local-first. No tracking. Ever.
+      - generic [ref=f3e218]: Native macOS · Local-first · Open source

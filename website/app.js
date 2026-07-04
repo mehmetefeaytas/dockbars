@@ -3,6 +3,9 @@
   var DICT = window.DOCKBARS_I18N || {};
   var SUPPORTED = ["en", "tr", "de", "es"];
 
+  // Signal that JS is active so reveal-animations can hide-before-reveal safely.
+  document.documentElement.classList.add("js");
+
   // ---------- i18n ----------
   function pickInitialLang() {
     var saved = localStorage.getItem("dockbars-lang");
@@ -75,18 +78,35 @@
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduce) { openPocket(); } else { playIntro(); }
 
+  // ---------- Nav shadow on scroll ----------
+  var nav = document.querySelector(".nav");
+  if (nav) {
+    var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 8); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
   // ---------- Scroll reveal ----------
+  var revealables = document.querySelectorAll(".card, .step");
   if ("IntersectionObserver" in window && !reduce) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
       });
-    }, { threshold: 0.15 });
-    document.querySelectorAll(".card, .step").forEach(function (el, i) {
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    revealables.forEach(function (el, i) {
       el.style.transitionDelay = (i % 3) * 60 + "ms";
       io.observe(el);
     });
+    // Safety net: if anything is still hidden after 3s (e.g. never scrolled into
+    // view on a very tall viewport), reveal it so content is never lost.
+    setTimeout(function () {
+      revealables.forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight) el.classList.add("in");
+      });
+    }, 3000);
   } else {
-    document.querySelectorAll(".card, .step").forEach(function (el) { el.classList.add("in"); });
+    revealables.forEach(function (el) { el.classList.add("in"); });
   }
 })();
