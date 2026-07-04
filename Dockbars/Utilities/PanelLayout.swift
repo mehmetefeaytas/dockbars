@@ -8,6 +8,8 @@ enum PanelLayout {
     static let spacing: CGFloat = 8
     static let padding: CGFloat = 12
     static let labelHeight: CGFloat = 16
+    /// Height reserved for the header (stash menu + toolbar) and its divider.
+    static let chromeHeight: CGFloat = 40
 
     static func cellSize(iconSize: CGFloat) -> CGSize {
         CGSize(width: iconSize + 24, height: iconSize + labelHeight + 12)

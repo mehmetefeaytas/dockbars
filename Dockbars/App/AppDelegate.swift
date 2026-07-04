@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var appState: AppState!
     private var dockObserver: DockObserver!
     private var hoverEngine: HoverEngine!
+    private var dragTriggerWindow: DragTriggerWindow!
     private var panelController: PanelController!
     private var menuBarController: MenuBarController!
     private var settingsWindowController: SettingsWindowController?
@@ -38,6 +39,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         hoverEngine.onOpen = { [weak self] in self?.openPanel() }
         hoverEngine.onClose = { [weak self] in self?.closePanel() }
+
+        dragTriggerWindow = DragTriggerWindow()
+        dragTriggerWindow.onDragEntered = { [weak self] in
+            // A file drag reached the trigger zone — open so it can be dropped in.
+            self?.hoverEngine.requestOpen() // → onOpen → openPanel()
+        }
 
         refreshGeometry()
         hoverEngine.start()
@@ -137,7 +144,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let placement = currentPlacement()
         appState.resolvedEdge = placement.edge
         hoverEngine.updateTriggerZone(placement.triggerZone)
+        dragTriggerWindow.update(frame: placement.triggerZone)
         panelController.configure(edge: placement.edge, size: placement.size)
+        panelController.applyAppearance(appState.settings.theme.appearance)
     }
 
     // MARK: - Panel lifecycle

@@ -6,8 +6,11 @@ import UniformTypeIdentifiers
 struct StashItemView: View {
     let item: StashItem
     let iconSize: CGFloat
+    let moveTargets: [Stash]
     let onOpen: () -> Void
     let onReveal: () -> Void
+    let onRename: () -> Void
+    let onMove: (Stash) -> Void
     let onRemove: () -> Void
 
     @State private var isHovering = false
@@ -48,6 +51,14 @@ struct StashItemView: View {
         .contextMenu {
             Button("Open") { onOpen() }
             Button("Reveal in Finder") { onReveal() }
+            Button("Rename…") { onRename() }
+            if !moveTargets.isEmpty {
+                Menu("Move to Stash") {
+                    ForEach(moveTargets) { stash in
+                        Button(stash.name) { onMove(stash) }
+                    }
+                }
+            }
             Divider()
             Button("Remove", role: .destructive) { onRemove() }
         }

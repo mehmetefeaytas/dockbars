@@ -4,6 +4,31 @@ All notable changes to Dockbars are documented here.
 
 ## [Unreleased]
 
+### Phase 2 (part 1) — drag fix, multiple stashes, themes
+
+**Fixed**
+- **Drag-and-drop to add now works.** Dragging a file from Finder is a drag session,
+  which NSEvent monitors don't observe — so hovering couldn't open the pocket mid-drag.
+  Added a transparent **`DragTriggerWindow`** over the trigger zone whose `draggingEntered`
+  opens the pocket, so files can be dragged straight in. (`.leftMouseDragged` also added to
+  the hover monitors for in-app drags.)
+
+**Added**
+- **Drag-to-remove** — a trash target in the panel header; drag an item onto it to remove
+  it from the stash (dragging an item out to Finder still copies it, as before).
+- **Multiple stashes** — a stash menu in the header lists all stashes (checkmark on the
+  current), with **New Stash… / Rename Stash… / Delete Stash** and quick access to Settings.
+  Selection is tracked in `AppState.selectedStashIndex`.
+- **Full item context menu** — Open, Reveal in Finder, **Rename…**, **Move to Stash ▸**, Remove.
+- **Themes** — System / Light / Dark applied to the pocket panel (`PanelTheme`), selectable
+  in Settings.
+- **`InputPrompt`** — modal name prompt for creating/renaming stashes and items (the
+  non-activating panel can't host a focused text field).
+- Panel size now reserves header/toolbar chrome (`PanelLayout.chromeHeight`).
+
+**Still to do in Phase 2:** in-panel search, keyboard navigation + ⌘1–9, extended item
+types (URL / folder / Shortcut / script), running-apps section.
+
 ### Liquid Glass, easy adding & panel header
 
 **Added**

@@ -30,6 +30,11 @@ final class PanelController {
 
     var frame: CGRect { panel.frame }
 
+    /// Force the panel's appearance (System / Light / Dark).
+    func applyAppearance(_ appearance: NSAppearance?) {
+        panel.appearance = appearance
+    }
+
     /// Update the layout the next open should use.
     func configure(edge: PanelEdge, size: CGSize) {
         self.edge = edge

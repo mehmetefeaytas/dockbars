@@ -86,6 +86,11 @@ enum DockGeometry {
     /// Keep a reasonable minimum pocket size even for small/empty stashes.
     private static let minimumSlots = 4
 
+    /// Adds the header/toolbar allowance to a grid-only size.
+    private static func withChrome(_ size: CGSize) -> CGSize {
+        CGSize(width: size.width, height: size.height + PanelLayout.chromeHeight)
+    }
+
     static func placement(mode: PlacementMode,
                           dockInfo: DockInfo,
                           preferredEdge: PanelEdge,
@@ -99,7 +104,7 @@ enum DockGeometry {
             let edge = resolveEdge(preferred: preferredEdge, orientation: dockInfo.orientation)
             let maxColumns = edge.isVertical ? 3 : 6
             let columns = min(maxColumns, count)
-            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: count, columns: columns)
+            let size = withChrome(PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: count, columns: columns))
             let origin = panelOrigin(edge: edge, panelSize: size, visibleFrame: dockInfo.visibleFrame)
             let trigger = triggerZone(edge: edge, screenFrame: dockInfo.screenFrame, thickness: triggerThickness)
             return PlacementResult(edge: edge, origin: origin, size: size, triggerZone: trigger, overflowed: false)
@@ -144,7 +149,7 @@ enum DockGeometry {
             let besideColumns = PanelLayout.columnsThatFit(width: gapLeft - margin, iconSize: iconSize)
             if besideColumns >= 1 {
                 let columns = min(besideColumns, itemCount)
-                let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+                let size = withChrome(PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns))
                 let availableHeight = visible.maxY - dock.minY - margin
                 if size.height <= availableHeight {
                     // Fits in the bottom-left gap, beside the Dock.
@@ -157,7 +162,7 @@ enum DockGeometry {
             // Too large to fit beside → stack above the Dock, using the full width.
             let aboveColumns = max(1, PanelLayout.columnsThatFit(width: visible.width * 0.6, iconSize: iconSize))
             let columns = min(aboveColumns, itemCount)
-            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+            let size = withChrome(PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns))
             let x = clamp(dock.midX - size.width / 2, visible.minX, max(visible.minX, visible.maxX - size.width))
             let y = dock.maxY + margin
             let trigger = CGRect(x: screen.minX, y: screen.minY, width: max(gapLeft, 120), height: t)
@@ -166,7 +171,7 @@ enum DockGeometry {
 
         case .left:
             let columns = min(3, itemCount)
-            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+            let size = withChrome(PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns))
             let y = clamp(dock.minY, visible.minY, max(visible.minY, visible.maxY - size.height))
             let origin = CGPoint(x: dock.maxX + margin, y: y)
             let trigger = CGRect(x: screen.minX, y: screen.minY, width: t, height: screen.height)
@@ -175,7 +180,7 @@ enum DockGeometry {
 
         case .right:
             let columns = min(3, itemCount)
-            let size = PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns)
+            let size = withChrome(PanelLayout.adaptiveSize(iconSize: iconSize, itemCount: itemCount, columns: columns))
             let y = clamp(dock.minY, visible.minY, max(visible.minY, visible.maxY - size.height))
             let origin = CGPoint(x: dock.minX - size.width - margin, y: y)
             let trigger = CGRect(x: screen.maxX - t, y: screen.minY, width: t, height: screen.height)

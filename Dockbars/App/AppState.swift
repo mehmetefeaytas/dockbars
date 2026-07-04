@@ -16,6 +16,9 @@ final class AppState: ObservableObject {
     @Published var isPanelVisible = false
     @Published var accessibilityTrusted: Bool
 
+    /// Index of the currently shown stash (Phase 2 multi-stash).
+    @Published var selectedStashIndex = 0
+
     // Actions wired by AppDelegate so SwiftUI views and menus can drive behavior.
     var onTogglePanel: (() -> Void)?
     var onShowTutorial: (() -> Void)?

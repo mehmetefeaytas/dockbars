@@ -38,6 +38,12 @@ struct SettingsView: View {
                     .help("Which screen edge the pocket opens from. Options depend on your Dock position.")
                 }
 
+                Picker("Theme", selection: $settings.theme) {
+                    ForEach(PanelTheme.allCases) { theme in
+                        Text(theme.displayName).tag(theme)
+                    }
+                }
+
                 HStack {
                     Text("Icon size")
                     Slider(value: $settings.iconSize, in: 32...64, step: 4)

@@ -41,11 +41,15 @@ final class HoverEngine {
     }
 
     func start() {
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
+        // Track drags too: dragging a file from Finder emits .leftMouseDragged, not
+        // .mouseMoved — without this the pocket won't open (or stay open) mid-drag,
+        // which is exactly what's needed to drop items in.
+        let mask: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged]
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: mask) { [weak self] _ in
             self?.handleMouseMoved()
         }
-        // Local monitor covers moves delivered to our own (nonactivating) panel.
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .mouseMoved) { [weak self] event in
+        // Local monitor covers events delivered to our own (nonactivating) panel.
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: mask) { [weak self] event in
             self?.handleMouseMoved()
             return event
         }
