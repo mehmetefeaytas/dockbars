@@ -38,6 +38,9 @@ final class AppState: ObservableObject {
     var onExportConfig: (() -> Void)?
     var onImportConfig: (() -> Void)?
 
+    /// Shared profile store (settings snapshots switchable from the menu bar).
+    let profiles = ProfileStore()
+
     init(settings: SettingsStore, container: ModelContainer) {
         self.settings = settings
         self.container = container

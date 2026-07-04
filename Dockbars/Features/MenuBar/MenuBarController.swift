@@ -11,6 +11,9 @@ final class MenuBarController {
     var onTogglePanel: (() -> Void)?
     var onOpenSettings: (() -> Void)?
     var onShowTutorial: (() -> Void)?
+    var onSwitchProfile: ((String?) -> Void)?   // nil = no profile
+    var onSaveProfile: (() -> Void)?
+    var onDeleteProfile: ((String) -> Void)?
 
     init(appState: AppState) {
         self.appState = appState
@@ -43,9 +46,14 @@ final class MenuBarController {
     }
 
     private func buildMenu() {
+        menu.removeAllItems()
         let toggle = NSMenuItem(title: "Open / Close Pocket", action: #selector(toggle), keyEquivalent: "")
         toggle.target = self
         menu.addItem(toggle)
+
+        menu.addItem(.separator())
+        menu.addItem(profileMenuItem())
+
         menu.addItem(.separator())
         let settings = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         settings.target = self
@@ -59,12 +67,52 @@ final class MenuBarController {
         menu.addItem(quit)
     }
 
+    private func profileMenuItem() -> NSMenuItem {
+        let root = NSMenuItem(title: "Profile", action: nil, keyEquivalent: "")
+        let sub = NSMenu()
+
+        let none = NSMenuItem(title: "None", action: #selector(chooseNoProfile), keyEquivalent: "")
+        none.target = self
+        none.state = appState.profiles.activeName == nil ? .on : .off
+        sub.addItem(none)
+
+        if !appState.profiles.profiles.isEmpty { sub.addItem(.separator()) }
+        for profile in appState.profiles.profiles {
+            let item = NSMenuItem(title: profile.name, action: #selector(chooseProfile(_:)), keyEquivalent: "")
+            item.target = self
+            item.representedObject = profile.name
+            item.state = appState.profiles.activeName == profile.name ? .on : .off
+            sub.addItem(item)
+        }
+
+        sub.addItem(.separator())
+        let save = NSMenuItem(title: "Save Current as Profile…", action: #selector(saveProfile), keyEquivalent: "")
+        save.target = self
+        sub.addItem(save)
+        if let active = appState.profiles.activeName {
+            let del = NSMenuItem(title: "Delete “\(active)”", action: #selector(deleteActiveProfile), keyEquivalent: "")
+            del.target = self
+            del.representedObject = active
+            sub.addItem(del)
+        }
+        root.submenu = sub
+        return root
+    }
+
+    @objc private func chooseNoProfile() { onSwitchProfile?(nil) }
+    @objc private func chooseProfile(_ sender: NSMenuItem) { onSwitchProfile?(sender.representedObject as? String) }
+    @objc private func saveProfile() { onSaveProfile?() }
+    @objc private func deleteActiveProfile(_ sender: NSMenuItem) {
+        if let name = sender.representedObject as? String { onDeleteProfile?(name) }
+    }
+
     @objc private func statusItemClicked() {
         let event = NSApp.currentEvent
         let isRight = event?.type == .rightMouseUp
             || (event?.modifierFlags.contains(.control) ?? false)
         if isRight {
-            // Show the menu on demand (kept off the status item so left-click works).
+            // Rebuild so the Profile submenu reflects the current profiles/active.
+            buildMenu()
             statusItem.menu = menu
             statusItem.button?.performClick(nil)
             statusItem.menu = nil

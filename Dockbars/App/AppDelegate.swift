@@ -101,6 +101,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController.onTogglePanel = { [weak self] in self?.togglePanel() }
         menuBarController.onOpenSettings = { [weak self] in self?.openSettings() }
         menuBarController.onShowTutorial = { [weak self] in self?.onboardingController.show() }
+        menuBarController.onSwitchProfile = { [weak self] name in self?.switchProfile(name) }
+        menuBarController.onSaveProfile = { [weak self] in self?.saveProfile() }
+        menuBarController.onDeleteProfile = { [weak self] name in self?.appState.profiles.delete(named: name) }
 
         observeSettings()
 
@@ -364,6 +367,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let index = stashes.firstIndex(where: { $0.name.caseInsensitiveCompare(name) == .orderedSame }) {
             appState.selectedStashIndex = index
         }
+    }
+
+    // MARK: - Profiles
+
+    private func switchProfile(_ name: String?) {
+        appState.profiles.setActive(name)
+        if let name, let profile = appState.profiles.profile(named: name) {
+            appState.settings.apply(profile.settings)
+        }
+        refreshGeometry()
+    }
+
+    private func saveProfile() {
+        guard let name = InputPrompt.string(title: "Save Profile",
+                                            message: "Name this profile (e.g. Work, Meeting)") else { return }
+        appState.profiles.save(Profile(name: name, settings: appState.settings.snapshot()))
+        appState.profiles.setActive(name)
     }
 
     // MARK: - Export / Import

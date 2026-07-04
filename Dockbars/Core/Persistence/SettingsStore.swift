@@ -101,4 +101,34 @@ final class SettingsStore: ObservableObject {
         hotKeyCode = (defaults.object(forKey: Keys.hotKeyCode) as? Int) ?? 49
         hotKeyModifiers = (defaults.object(forKey: Keys.hotKeyModifiers) as? Int) ?? 2048
     }
+
+    // MARK: - Profiles
+
+    /// Captures the appearance/layout settings into a snapshot.
+    func snapshot() -> SettingsSnapshot {
+        SettingsSnapshot(
+            placementMode: placementMode.rawValue,
+            theme: theme.rawValue,
+            preferredEdge: preferredEdge.rawValue,
+            iconSize: iconSize,
+            useListView: useListView,
+            showRecent: showRecent,
+            showRunningApps: showRunningApps,
+            clipboardHistory: clipboardHistory,
+            showWidgets: showWidgets
+        )
+    }
+
+    /// Applies a snapshot's values back onto the live settings.
+    func apply(_ s: SettingsSnapshot) {
+        placementMode = PlacementMode(rawValue: s.placementMode) ?? placementMode
+        theme = PanelTheme(rawValue: s.theme) ?? theme
+        preferredEdge = PanelEdge(rawValue: s.preferredEdge) ?? preferredEdge
+        iconSize = s.iconSize
+        useListView = s.useListView
+        showRecent = s.showRecent
+        showRunningApps = s.showRunningApps
+        clipboardHistory = s.clipboardHistory
+        showWidgets = s.showWidgets
+    }
 }
