@@ -8,6 +8,7 @@ struct StashItemView: View {
     let iconSize: CGFloat
     let moveTargets: [Stash]
     var isHighlighted: Bool = false
+    var listStyle: Bool = false
     var onDragStart: () -> Void = {}
     let onOpen: () -> Void
     let onReveal: () -> Void
@@ -38,11 +39,45 @@ struct StashItemView: View {
             ),
             content: AnyView(cell)
         )
-        .frame(width: cellSize.width, height: cellSize.height)
+        .frame(width: listStyle ? nil : cellSize.width,
+               height: listStyle ? max(iconSize * 0.6, 28) : cellSize.height)
+        .frame(maxWidth: listStyle ? .infinity : nil)
         .help(item.displayName)
     }
 
+    @ViewBuilder
     private var cell: some View {
+        if listStyle { listCell } else { gridCell }
+    }
+
+    private var listCell: some View {
+        HStack(spacing: 8) {
+            Image(nsImage: icon)
+                .resizable()
+                .frame(width: min(iconSize, 22), height: min(iconSize, 22))
+            Text(item.displayName)
+                .font(.callout)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer(minLength: 0)
+            if item.isPinned {
+                Image(systemName: "pin.fill").font(.system(size: 9)).foregroundStyle(.orange)
+            }
+        }
+        .padding(.horizontal, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(isHighlighted ? Color.accentColor.opacity(0.18) : Color.clear)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(isHighlighted ? Color.accentColor : Color.clear, lineWidth: 2)
+        )
+        .contentShape(Rectangle())
+    }
+
+    private var gridCell: some View {
         VStack(spacing: 4) {
             Image(nsImage: icon)
                 .resizable()

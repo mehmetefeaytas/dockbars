@@ -69,6 +69,8 @@ struct SettingsView: View {
                         .frame(width: 48, alignment: .trailing)
                 }
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
+                Toggle("List view", isOn: $settings.useListView)
+                Toggle("Show recently used", isOn: $settings.showRecent)
                 Toggle("Show running apps", isOn: $settings.showRunningApps)
             }
 

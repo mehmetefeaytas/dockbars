@@ -10,6 +10,7 @@ struct PocketPanelView: View {
     @Query(sort: \Stash.order) private var stashes: [Stash]
 
     @StateObject private var runningApps = RunningAppsMonitor()
+    @ObservedObject private var recents = RecentTracker.shared
     @State private var isDropTargeted = false
     @State private var isRemoveTargeted = false
     /// The item currently being dragged (set when its drag begins), so the trash
@@ -170,13 +171,20 @@ struct PocketPanelView: View {
         .fixedSize()
     }
 
+    private var itemColumns: [GridItem] {
+        appState.settings.useListView
+            ? [GridItem(.flexible(), spacing: PanelLayout.spacing)]
+            : columns
+    }
+
     private var grid: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: PanelLayout.spacing) {
+            LazyVGrid(columns: itemColumns, spacing: PanelLayout.spacing) {
                 ForEach(Array(filteredItems.enumerated()), id: \.element.persistentModelID) { index, item in
                     StashItemView(
                         item: item, iconSize: iconSize, moveTargets: moveTargets,
                         isHighlighted: appState.panelActivated && index == appState.highlightedIndex,
+                        listStyle: appState.settings.useListView,
                         onDragStart: { draggingItemID = item.persistentModelID },
                         onOpen: { open(item) },
                         onReveal: { reveal(item) },
@@ -189,9 +197,35 @@ struct PocketPanelView: View {
             }
             .padding(PanelLayout.padding)
 
+            if appState.settings.showRecent && !recents.records.isEmpty {
+                recentSection
+            }
             if appState.settings.showRunningApps && !runningApps.apps.isEmpty {
                 runningSection
             }
+        }
+    }
+
+    private var recentSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Divider().opacity(0.4)
+            HStack {
+                Text("Recently used")
+                    .font(.caption).bold()
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button("Clear") { recents.clear() }
+                    .buttonStyle(.borderless)
+                    .font(.caption2)
+            }
+            .padding(.horizontal, PanelLayout.padding)
+            LazyVGrid(columns: columns, spacing: PanelLayout.spacing) {
+                ForEach(recents.records.prefix(12)) { record in
+                    RecentItemView(record: record, iconSize: iconSize)
+                }
+            }
+            .padding(.horizontal, PanelLayout.padding)
+            .padding(.bottom, PanelLayout.padding)
         }
     }
 
@@ -245,6 +279,7 @@ struct PocketPanelView: View {
     // MARK: - Item actions
 
     private func open(_ item: StashItem) {
+        RecentTracker.shared.record(item)
         ItemLauncher.open(item)
     }
 

@@ -20,6 +20,29 @@ enum ItemLauncher {
         item.kind == .file
     }
 
+    /// Opens a recent record (no live StashItem needed).
+    static func open(_ record: RecentRecord) {
+        switch record.kind {
+        case .file, .url:
+            if let url = URL(string: record.urlString) { NSWorkspace.shared.open(url) }
+        case .shortcut:
+            run("/usr/bin/shortcuts", ["run", record.payload ?? record.displayName])
+        case .script:
+            run("/bin/zsh", ["-lc", record.payload ?? ""])
+        }
+    }
+
+    static func icon(for record: RecentRecord, size: CGFloat) -> NSImage {
+        switch record.kind {
+        case .file:
+            if let url = URL(string: record.urlString) { return IconProvider.icon(for: url, size: size) }
+            return symbol("doc", size: size)
+        case .url: return symbol("globe", size: size)
+        case .shortcut: return symbol("wand.and.stars", size: size)
+        case .script: return symbol("terminal", size: size)
+        }
+    }
+
     static func icon(for item: StashItem, size: CGFloat) -> NSImage {
         switch item.kind {
         case .file:

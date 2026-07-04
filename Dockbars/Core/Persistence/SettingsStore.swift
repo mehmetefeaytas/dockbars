@@ -16,6 +16,8 @@ final class SettingsStore: ObservableObject {
         static let iconSize = "iconSize"
         static let launchAtLogin = "launchAtLogin"
         static let showRunningApps = "showRunningApps"
+        static let useListView = "useListView"
+        static let showRecent = "showRecent"
     }
 
     private let defaults: UserDefaults
@@ -53,6 +55,14 @@ final class SettingsStore: ObservableObject {
     @Published var showRunningApps: Bool {
         didSet { defaults.set(showRunningApps, forKey: Keys.showRunningApps) }
     }
+    /// Render items as a list instead of a grid.
+    @Published var useListView: Bool {
+        didSet { defaults.set(useListView, forKey: Keys.useListView) }
+    }
+    /// Show a "Recently used" section.
+    @Published var showRecent: Bool {
+        didSet { defaults.set(showRecent, forKey: Keys.showRecent) }
+    }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -64,5 +74,7 @@ final class SettingsStore: ObservableObject {
         iconSize = (defaults.object(forKey: Keys.iconSize) as? Double) ?? 48
         launchAtLogin = LaunchAtLogin.isEnabled
         showRunningApps = defaults.bool(forKey: Keys.showRunningApps)
+        useListView = defaults.bool(forKey: Keys.useListView)
+        showRecent = defaults.bool(forKey: Keys.showRecent)
     }
 }
