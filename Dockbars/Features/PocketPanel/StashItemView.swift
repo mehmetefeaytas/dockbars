@@ -14,6 +14,7 @@ struct StashItemView: View {
     let onRename: () -> Void
     let onMove: (Stash) -> Void
     let onRemove: () -> Void
+    var onTogglePin: () -> Void = {}
 
     private var icon: NSImage {
         ItemLauncher.icon(for: item, size: iconSize)
@@ -31,6 +32,8 @@ struct StashItemView: View {
                 rename: onRename,
                 remove: onRemove,
                 moveTargets: moveTargets.map { stash in (stash.name, { onMove(stash) }) },
+                isPinned: item.isPinned,
+                togglePin: onTogglePin,
                 dragBegan: onDragStart
             ),
             content: AnyView(cell)
@@ -60,6 +63,14 @@ struct StashItemView: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(isHighlighted ? Color.accentColor : Color.clear, lineWidth: 2)
         )
+        .overlay(alignment: .topTrailing) {
+            if item.isPinned {
+                Image(systemName: "pin.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.orange)
+                    .padding(3)
+            }
+        }
         .contentShape(Rectangle())
     }
 }

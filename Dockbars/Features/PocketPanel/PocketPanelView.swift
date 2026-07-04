@@ -36,7 +36,10 @@ struct PocketPanelView: View {
     }
 
     private var sortedItems: [StashItem] {
-        (currentStash?.items ?? []).sorted { $0.order < $1.order }
+        (currentStash?.items ?? []).sorted { a, b in
+            if a.isPinned != b.isPinned { return a.isPinned } // pinned first
+            return a.order < b.order
+        }
     }
 
     /// Items after applying the search filter.
@@ -179,7 +182,8 @@ struct PocketPanelView: View {
                         onReveal: { reveal(item) },
                         onRename: { renameItem(item) },
                         onMove: { moveItem(item, to: $0) },
-                        onRemove: { remove(item) }
+                        onRemove: { remove(item) },
+                        onTogglePin: { togglePin(item) }
                     )
                 }
             }
@@ -257,6 +261,11 @@ struct PocketPanelView: View {
     private func renameItem(_ item: StashItem) {
         guard let name = InputPrompt.string(title: "Rename Item", defaultValue: item.displayName) else { return }
         item.displayName = name
+        try? context.save()
+    }
+
+    private func togglePin(_ item: StashItem) {
+        item.isPinned.toggle()
         try? context.save()
     }
 

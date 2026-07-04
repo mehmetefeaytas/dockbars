@@ -46,7 +46,7 @@ struct SettingsView: View {
 
                 HStack {
                     Text("Icon size")
-                    Slider(value: $settings.iconSize, in: 32...64, step: 4)
+                    Slider(value: $settings.iconSize, in: 16...128, step: 4)
                     Text("\(Int(settings.iconSize)) px")
                         .monospacedDigit()
                         .frame(width: 48, alignment: .trailing)

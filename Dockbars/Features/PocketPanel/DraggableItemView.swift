@@ -8,6 +8,8 @@ struct ItemActions {
     var rename: () -> Void
     var remove: () -> Void
     var moveTargets: [(name: String, move: () -> Void)]
+    var isPinned: Bool = false
+    var togglePin: () -> Void = {}
     var dragBegan: () -> Void = {}
 }
 
@@ -93,6 +95,7 @@ final class DragSourceView: NSView, NSDraggingSource {
         let menu = NSMenu()
         add(menu, "Open", #selector(doOpen))
         add(menu, "Reveal in Finder", #selector(doReveal))
+        add(menu, actions.isPinned ? "Unpin" : "Pin", #selector(doTogglePin))
         add(menu, "Rename…", #selector(doRename))
         if !actions.moveTargets.isEmpty {
             let move = NSMenuItem(title: "Move to Stash", action: nil, keyEquivalent: "")
@@ -121,6 +124,7 @@ final class DragSourceView: NSView, NSDraggingSource {
     @objc private func doReveal() { actions?.reveal() }
     @objc private func doRename() { actions?.rename() }
     @objc private func doRemove() { actions?.remove() }
+    @objc private func doTogglePin() { actions?.togglePin() }
     @objc private func doMove(_ sender: NSMenuItem) {
         guard let actions, actions.moveTargets.indices.contains(sender.tag) else { return }
         actions.moveTargets[sender.tag].move()

@@ -37,6 +37,8 @@ final class StashItem {
     var kindRaw: String = StashItemKind.file.rawValue
     /// Extra data: the Shortcut name or the shell script body.
     var payload: String?
+    /// Pinned items sort to the front of their stash.
+    var isPinned: Bool = false
     var stash: Stash?
 
     init(displayName: String, urlString: String, bookmarkData: Data? = nil,

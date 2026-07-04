@@ -18,6 +18,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsCancellable: AnyCancellable?
     private var keyMonitor: Any?
     private var lastGridColumns = 3
+    private var globalHotKey: GlobalHotKey!
+    private var fullscreenMonitor: FullscreenMonitor!
 
     private var reduceMotion: Bool {
         NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
@@ -56,6 +58,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         installKeyboardMonitor()
+
+        // Global shortcut (⌥Space) to toggle the pocket from anywhere.
+        globalHotKey = GlobalHotKey()
+        globalHotKey.onFire = { [weak self] in self?.togglePanel() }
+        globalHotKey.register()
+
+        // Suspend hover detection while a fullscreen app is frontmost.
+        fullscreenMonitor = FullscreenMonitor()
+        fullscreenMonitor.onChange = { [weak self] isFullscreen in
+            self?.hoverEngine.isSuspended = isFullscreen
+        }
+        hoverEngine.isSuspended = fullscreenMonitor.isFullscreen
 
         refreshGeometry()
         hoverEngine.start()
