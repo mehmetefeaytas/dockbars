@@ -11,10 +11,10 @@ struct PocketPanelView: View {
 
     @State private var isDropTargeted = false
     @State private var isRemoveTargeted = false
-    @State private var searchText = ""
-    @State private var highlighted = 0
-    @State private var gridColumns = 3
-    @FocusState private var keyboardFocused: Bool
+
+    // Search + highlight live in AppState, driven by the app-level keyboard monitor
+    // (keeping keyboard out of SwiftUI focus so it never interferes with drag & drop).
+    private var searchText: String { appState.searchQuery }
 
     private var clampedIndex: Int {
         guard !stashes.isEmpty else { return 0 }
@@ -67,18 +67,6 @@ struct PocketPanelView: View {
         .onDrop(of: [.fileURL], isTargeted: $isDropTargeted) { providers in
             handleAddDrop(providers)
         }
-        .focusable()
-        .focused($keyboardFocused)
-        .onKeyPress { press in handleKey(press) }
-        .onChange(of: appState.panelActivated) { _, activated in
-            keyboardFocused = activated
-        }
-        .onChange(of: appState.isPanelVisible) { _, visible in
-            if !visible { searchText = ""; highlighted = 0 }
-        }
-        .onChange(of: appState.selectedStashIndex) { _, _ in
-            searchText = ""; highlighted = 0
-        }
     }
 
     private var searchBar: some View {
@@ -90,7 +78,7 @@ struct PocketPanelView: View {
                 .lineLimit(1)
             Spacer()
             if !searchText.isEmpty {
-                Button { searchText = ""; highlighted = 0 } label: {
+                Button { appState.searchQuery = ""; appState.highlightedIndex = 0 } label: {
                     Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                 }
                 .buttonStyle(.borderless)
@@ -162,7 +150,7 @@ struct PocketPanelView: View {
                 ForEach(Array(filteredItems.enumerated()), id: \.element.persistentModelID) { index, item in
                     StashItemView(
                         item: item, iconSize: iconSize, moveTargets: moveTargets,
-                        isHighlighted: appState.panelActivated && index == highlighted,
+                        isHighlighted: appState.panelActivated && index == appState.highlightedIndex,
                         onOpen: { open(item) },
                         onReveal: { reveal(item) },
                         onRename: { renameItem(item) },
@@ -172,11 +160,6 @@ struct PocketPanelView: View {
                 }
             }
             .padding(PanelLayout.padding)
-            .background(GeometryReader { geo in
-                Color.clear.onChange(of: geo.size.width, initial: true) { _, width in
-                    gridColumns = max(1, Int((width - PanelLayout.spacing) / (cellWidth + PanelLayout.spacing)))
-                }
-            })
         }
     }
 
@@ -208,46 +191,6 @@ struct PocketPanelView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
         }
-    }
-
-    // MARK: - Keyboard
-
-    private func handleKey(_ press: KeyPress) -> KeyPress.Result {
-        // ⌘1–9 switches stash.
-        if press.modifiers.contains(.command), let digit = Int(press.characters), (1...9).contains(digit) {
-            if digit - 1 < stashes.count { appState.selectedStashIndex = digit - 1 }
-            return .handled
-        }
-        switch press.key {
-        case .escape:
-            if !searchText.isEmpty { searchText = ""; highlighted = 0 } else { appState.onTogglePanel?() }
-            return .handled
-        case .return:
-            if let item = filteredItems[safe: highlighted] { open(item) }
-            return .handled
-        case .leftArrow: moveHighlight(-1); return .handled
-        case .rightArrow: moveHighlight(1); return .handled
-        case .upArrow: moveHighlight(-gridColumns); return .handled
-        case .downArrow: moveHighlight(gridColumns); return .handled
-        case .deleteForward, .delete:
-            if !searchText.isEmpty { searchText.removeLast(); highlighted = 0 }
-            return .handled
-        default:
-            // Printable character → append to the search query.
-            if !press.modifiers.contains(.command), !press.modifiers.contains(.control),
-               press.characters.count == 1,
-               let scalar = press.characters.unicodeScalars.first, scalar.value >= 32 {
-                searchText.append(press.characters)
-                highlighted = 0
-                return .handled
-            }
-            return .ignored
-        }
-    }
-
-    private func moveHighlight(_ delta: Int) {
-        guard !filteredItems.isEmpty else { return }
-        highlighted = min(max(highlighted + delta, 0), filteredItems.count - 1)
     }
 
     // MARK: - Item actions

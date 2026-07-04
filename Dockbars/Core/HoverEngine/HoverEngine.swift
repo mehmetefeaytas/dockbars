@@ -23,6 +23,11 @@ final class HoverEngine {
 
     var onOpen: (() -> Void)?
     var onClose: (() -> Void)?
+    /// Fires once when the pointer transitions into the open panel's frame, so the
+    /// panel can be promoted to a key window (enabling keyboard/search) without a
+    /// hover-open ever stealing focus.
+    var onEnteredPanel: (() -> Void)?
+    private var wasInPanel = false
 
     init(closeDelay: TimeInterval) {
         debouncer = HoverDebouncer(closeDelay: closeDelay)
@@ -81,8 +86,12 @@ final class HoverEngine {
     private func handleMouseMoved() {
         guard !isSuspended else { return }
         let location = NSEvent.mouseLocation // cheap property, global bottom-left coords
-        let inside = cachedTriggerZone.contains(location)
-            || (debouncer.isOpen && (panelFrameProvider?()?.contains(location) ?? false))
+        let inPanel = debouncer.isOpen && (panelFrameProvider?()?.contains(location) ?? false)
+        let inside = cachedTriggerZone.contains(location) || inPanel
+
+        // Promote to a key window the moment the pointer enters the open panel.
+        if inPanel && !wasInPanel { onEnteredPanel?() }
+        wasInPanel = inPanel && debouncer.isOpen
 
         let now = ProcessInfo.processInfo.systemUptime
         if inside {

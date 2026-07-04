@@ -4,6 +4,20 @@ All notable changes to Dockbars are documented here.
 
 ## [Unreleased]
 
+### Fixes — keyboard now works after hover; drag & drop restored
+
+**Fixed**
+- **Keyboard navigation/search now works with hover-opened pockets.** Previously it
+  only worked when opened from the menu bar. Now the pocket is promoted to a key
+  window the moment the pointer **enters** it (`HoverEngine.onEnteredPanel`), so search
+  and arrow/Return/Esc/⌘1–9 work in the normal hover flow — while a hover-open still
+  never steals focus until you move into the panel.
+- **Drag-and-drop add/remove restored.** The Phase 2 search work added `.focusable()`
+  + `.onKeyPress` to the panel, which broke drop hit-testing. Keyboard handling moved
+  to an app-level local `NSEvent` key monitor (`installKeyboardMonitor`), so SwiftUI
+  focus no longer interferes with drag & drop. Search/highlight state moved to `AppState`.
+- Reset the (accidentally persisted) placement default back to **Beside the Dock**.
+
 ### Phase 2 (part 2) — search & keyboard navigation
 
 **Added**

@@ -45,10 +45,18 @@ final class PanelController {
         }
     }
 
+    /// Promote the (already visible) panel to a key window so it accepts keyboard.
+    func makeKey() {
+        guard isVisible else { return }
+        panel.keyable = true
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
+    }
+
     func show(edge: PanelEdge, origin: CGPoint, size: CGSize, reduceMotion: Bool, activated: Bool = false) {
         self.edge = edge
         self.panelSize = size
-        panel.keyable = activated
+        panel.keyable = true // may become key later (on pointer-enter) or now (if activated)
         panel.setContentSize(size)
 
         let finalFrame = CGRect(origin: origin, size: size)

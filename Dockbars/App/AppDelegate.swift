@@ -16,6 +16,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var settingsWindowController: SettingsWindowController?
     private var onboardingController: OnboardingController!
     private var settingsCancellable: AnyCancellable?
+    private var keyMonitor: Any?
+    private var lastGridColumns = 3
 
     private var reduceMotion: Bool {
         NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
@@ -40,11 +42,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hoverEngine.onOpen = { [weak self] in self?.openPanel() }
         hoverEngine.onClose = { [weak self] in self?.closePanel() }
 
+        hoverEngine.onEnteredPanel = { [weak self] in
+            // Pointer moved into the open pocket → allow keyboard/search now.
+            guard let self else { return }
+            self.panelController.makeKey()
+            self.appState.panelActivated = true
+        }
+
         dragTriggerWindow = DragTriggerWindow()
         dragTriggerWindow.onDragEntered = { [weak self] in
             // A file drag reached the trigger zone — open so it can be dropped in.
             self?.hoverEngine.requestOpen() // → onOpen → openPanel()
         }
+
+        installKeyboardMonitor()
 
         refreshGeometry()
         hoverEngine.start()
@@ -161,6 +172,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         dragTriggerWindow.update(frame: placement.triggerZone)
         panelController.configure(edge: placement.edge, size: placement.size)
         panelController.applyAppearance(appState.settings.theme.appearance)
+        lastGridColumns = max(1, PanelLayout.columnsThatFit(width: placement.size.width,
+                                                            iconSize: CGFloat(appState.settings.iconSize)))
     }
 
     // MARK: - Panel lifecycle
@@ -185,6 +198,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panelController.hide(reduceMotion: reduceMotion)
         appState.isPanelVisible = false
         appState.panelActivated = false
+        appState.searchQuery = ""
+        appState.highlightedIndex = 0
         NSLog("Dockbars ▸ closePanel")
     }
 
@@ -195,6 +210,88 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             pendingActivated = true // menu-invoked → enable keyboard/search
             hoverEngine.requestOpen()
         }
+    }
+
+    // MARK: - Keyboard
+
+    /// A local key monitor drives search + navigation while the pocket is a key
+    /// window. Kept out of SwiftUI focus so it never interferes with drag & drop.
+    private func installKeyboardMonitor() {
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self else { return event }
+            return self.handleKeyDown(event)
+        }
+    }
+
+    private func handleKeyDown(_ event: NSEvent) -> NSEvent? {
+        guard appState.isPanelVisible, appState.panelActivated else { return event }
+        let items = filteredItems()
+
+        // ⌘1–9 → switch stash.
+        if event.modifierFlags.contains(.command),
+           let chars = event.charactersIgnoringModifiers, let digit = Int(chars), (1...9).contains(digit) {
+            if digit - 1 < stashCount() {
+                appState.selectedStashIndex = digit - 1
+                appState.searchQuery = ""
+                appState.highlightedIndex = 0
+            }
+            return nil
+        }
+        if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.control) {
+            return event
+        }
+
+        switch event.keyCode {
+        case 53: // Escape
+            if !appState.searchQuery.isEmpty {
+                appState.searchQuery = ""; appState.highlightedIndex = 0
+            } else {
+                hoverEngine.requestClose()
+            }
+            return nil
+        case 36, 76: // Return / keypad Enter
+            if let item = items[safe: appState.highlightedIndex], let url = item.resolvedURL {
+                NSWorkspace.shared.open(url)
+                hoverEngine.requestClose()
+            }
+            return nil
+        case 123: moveHighlight(-1, count: items.count); return nil          // left
+        case 124: moveHighlight(1, count: items.count); return nil           // right
+        case 126: moveHighlight(-lastGridColumns, count: items.count); return nil // up
+        case 125: moveHighlight(lastGridColumns, count: items.count); return nil  // down
+        case 51: // Delete / Backspace
+            if !appState.searchQuery.isEmpty { appState.searchQuery.removeLast(); appState.highlightedIndex = 0 }
+            return nil
+        default:
+            if let chars = event.characters, chars.count == 1,
+               let scalar = chars.unicodeScalars.first, scalar.value >= 32 {
+                appState.searchQuery.append(chars)
+                appState.highlightedIndex = 0
+                return nil
+            }
+            return event
+        }
+    }
+
+    private func moveHighlight(_ delta: Int, count: Int) {
+        guard count > 0 else { return }
+        appState.highlightedIndex = min(max(appState.highlightedIndex + delta, 0), count - 1)
+    }
+
+    /// Current stash's items after the search filter (mirrors the panel view).
+    private func filteredItems() -> [StashItem] {
+        let context = container.mainContext
+        let stashes = (try? context.fetch(FetchDescriptor<Stash>(sortBy: [SortDescriptor(\.order)]))) ?? []
+        guard !stashes.isEmpty else { return [] }
+        let index = min(max(appState.selectedStashIndex, 0), stashes.count - 1)
+        let items = stashes[index].items.sorted { $0.order < $1.order }
+        let query = appState.searchQuery
+        return query.isEmpty ? items : items.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
+    }
+
+    private func stashCount() -> Int {
+        let context = container.mainContext
+        return (try? context.fetchCount(FetchDescriptor<Stash>())) ?? 0
     }
 
     // MARK: - Settings
