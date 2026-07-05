@@ -2,9 +2,10 @@ import SwiftUI
 import AppKit
 import Carbon.HIToolbox
 
-/// A control that records a global shortcut. Click to arm, then press a key
-/// combination (at least one modifier + a key). Esc cancels; the bound values
-/// are written back through the bindings.
+/// A control that records a global shortcut. Click to arm, then press a chord
+/// (≥1 modifier + a key); Esc cancels. While armed it uses a local key-event
+/// monitor so the chord is captured regardless of focus — crucially, this also
+/// captures Space/Return, which a plain button would otherwise treat as a click.
 struct ShortcutRecorder: NSViewRepresentable {
     @Binding var keyCode: Int
     @Binding var carbonModifiers: Int
@@ -21,11 +22,15 @@ struct ShortcutRecorder: NSViewRepresentable {
     func updateNSView(_ nsView: RecorderButton, context: Context) {
         nsView.refreshTitle(keyCode: keyCode, carbonModifiers: carbonModifiers)
     }
+
+    static func dismantleNSView(_ nsView: RecorderButton, coordinator: ()) {
+        nsView.stopRecording()
+    }
 }
 
-/// AppKit button that becomes first responder and captures the next chord.
 final class RecorderButton: NSButton {
     var onCapture: ((Int, Int) -> Void)?
+    private var monitor: Any?
     private var recording = false
 
     override init(frame frameRect: NSRect) {
@@ -33,7 +38,7 @@ final class RecorderButton: NSButton {
         bezelStyle = .rounded
         setButtonType(.momentaryPushIn)
         target = self
-        action = #selector(startRecording)
+        action = #selector(toggleRecording)
         refreshTitle(keyCode: 49, carbonModifiers: 2048)
     }
 
@@ -44,35 +49,39 @@ final class RecorderButton: NSButton {
         title = KeyboardShortcut.displayString(keyCode: keyCode, carbonModifiers: carbonModifiers)
     }
 
-    @objc private func startRecording() {
-        recording = true
-        title = "Press keys…"
-        window?.makeFirstResponder(self)
+    @objc private func toggleRecording() {
+        if recording { stopRecording() } else { startRecording() }
     }
 
-    override var acceptsFirstResponder: Bool { true }
-
-    override func keyDown(with event: NSEvent) {
-        guard recording else { super.keyDown(with: event); return }
-
-        if event.keyCode == UInt16(kVK_Escape) {
-            recording = false
-            return // updateNSView restores the current title
+    private func startRecording() {
+        recording = true
+        title = NSLocalizedString("Press keys…", comment: "")
+        // Local monitor: intercept the next chord anywhere in the app, consuming
+        // it so Space/Return/etc. don't act as button clicks or type into fields.
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            self?.handle(event)
+            return nil // swallow the event while recording
         }
+    }
 
-        let carbon = KeyboardShortcut.carbonModifiers(from: event.modifierFlags)
-        // Require at least one modifier so the shortcut doesn't fire while typing.
-        guard carbon != 0 else {
-            NSSound.beep()
+    func stopRecording() {
+        recording = false
+        if let monitor { NSEvent.removeMonitor(monitor) }
+        monitor = nil
+    }
+
+    private func handle(_ event: NSEvent) {
+        if event.keyCode == UInt16(kVK_Escape) {
+            stopRecording()
+            refreshTitle(keyCode: 49, carbonModifiers: 2048) // updateNSView will restore the real value
             return
         }
-        recording = false
+        let carbon = KeyboardShortcut.carbonModifiers(from: event.modifierFlags)
+        guard carbon != 0 else { NSSound.beep(); return } // require a modifier
+        stopRecording()
         onCapture?(Int(event.keyCode), carbon)
         title = KeyboardShortcut.displayString(keyCode: Int(event.keyCode), carbonModifiers: carbon)
     }
 
-    override func resignFirstResponder() -> Bool {
-        recording = false
-        return super.resignFirstResponder()
-    }
+    deinit { if let monitor { NSEvent.removeMonitor(monitor) } }
 }
