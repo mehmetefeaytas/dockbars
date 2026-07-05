@@ -153,4 +153,7 @@ only network use) and a fuller String Catalog localization pass.
 
 ## License
 
-TBD.
+[GNU General Public License v3.0](LICENSE) © 2026 Mehmet Efe Aytaş.
+
+Dockbars is free software: you may use, study, share, and modify it. If you
+distribute a modified version, it must also be released under the GPLv3.
