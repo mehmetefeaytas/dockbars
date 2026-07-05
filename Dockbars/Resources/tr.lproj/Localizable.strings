@@ -71,6 +71,7 @@
 "Rename…" = "Yeniden Adlandır…";
 "Set Icon…" = "İkon Ayarla…";
 "Move to Stash" = "Stash'e Taşı";
+"Add Folder Contents" = "Klasör İçeriğini Ekle";
 "Remove" = "Kaldır";
 
 /* --- Diyaloglar / istemler (AppKit) --- */

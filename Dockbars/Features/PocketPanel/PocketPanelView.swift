@@ -62,6 +62,16 @@ struct PocketPanelView: View {
         stashes.filter { $0.persistentModelID != currentStash?.persistentModelID }
     }
 
+    /// Standardized bundle paths of currently-running apps, for the running dot.
+    private var runningPaths: Set<String> {
+        Set(runningApps.apps.compactMap { $0.bundleURL?.standardizedFileURL.path })
+    }
+
+    private func isRunning(_ item: StashItem) -> Bool {
+        guard item.kind == .file, let url = item.resolvedURL else { return false }
+        return runningPaths.contains(url.standardizedFileURL.path)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -203,6 +213,7 @@ struct PocketPanelView: View {
                     StashItemView(
                         item: item, iconSize: iconSize, moveTargets: moveTargets,
                         isHighlighted: appState.panelActivated && index == appState.highlightedIndex,
+                        isRunning: isRunning(item),
                         listStyle: appState.settings.useListView,
                         onDragStart: { draggingItemID = item.persistentModelID },
                         onOpen: { open(item) },
@@ -212,6 +223,7 @@ struct PocketPanelView: View {
                         onRemove: { remove(item) },
                         onTogglePin: { togglePin(item) },
                         onSetIcon: { setCustomIcon(item) },
+                        onAddFolderContents: { addFolderContents(of: item) },
                         onDropReorder: { reorderDragged(before: item) }
                     )
                 }
@@ -459,6 +471,18 @@ struct PocketPanelView: View {
               let name = InputPrompt.string(title: L("Add Snippet"), message: L("Name this snippet")) else { return }
         guard let text = InputPrompt.string(title: String(format: L("Snippet “%@”"), name), message: L("Text to copy when clicked")) else { return }
         insert(StashItem(displayName: name, urlString: "dockbars-snippet:\(name)", kind: .snippet, payload: text), into: stash)
+    }
+
+    /// Adds a folder's immediate visible children as items in the current stash.
+    private func addFolderContents(of item: StashItem) {
+        guard let stash = currentStash, let folder = item.resolvedURL else { return }
+        let children = (try? FileManager.default.contentsOfDirectory(
+            at: folder, includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
+        var order = (stash.items.map(\.order).max() ?? -1) + 1
+        for url in children.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            addItem(url: url, to: stash, order: order)
+            order += 1
+        }
     }
 
     private func setCustomIcon(_ item: StashItem) {

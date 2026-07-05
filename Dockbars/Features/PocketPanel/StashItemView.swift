@@ -8,6 +8,7 @@ struct StashItemView: View {
     let iconSize: CGFloat
     let moveTargets: [Stash]
     var isHighlighted: Bool = false
+    var isRunning: Bool = false
     var listStyle: Bool = false
     var onDragStart: () -> Void = {}
     let onOpen: () -> Void
@@ -17,7 +18,15 @@ struct StashItemView: View {
     let onRemove: () -> Void
     var onTogglePin: () -> Void = {}
     var onSetIcon: () -> Void = {}
+    var onAddFolderContents: (() -> Void)?
     var onDropReorder: () -> Bool = { false }
+
+    private var isDirectory: Bool {
+        guard item.kind == .file, let url = item.resolvedURL else { return false }
+        var isDir: ObjCBool = false
+        return FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir)
+            && isDir.boolValue && url.pathExtension != "app"
+    }
 
     @State private var peekTask: Task<Void, Never>?
 
@@ -40,6 +49,7 @@ struct StashItemView: View {
                 isPinned: item.isPinned,
                 togglePin: onTogglePin,
                 setIcon: onSetIcon,
+                addFolderContents: isDirectory ? onAddFolderContents : nil,
                 dragBegan: onDragStart,
                 dropReorder: onDropReorder
             ),
@@ -127,6 +137,14 @@ struct StashItemView: View {
                     .font(.system(size: 9))
                     .foregroundStyle(.orange)
                     .padding(3)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if isRunning {
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: 4, height: 4)
+                    .padding(.bottom, 1)
             }
         }
         .contentShape(Rectangle())
