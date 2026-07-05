@@ -75,6 +75,12 @@ struct SettingsView: View {
                                      carbonModifiers: $settings.hotKeyModifiers)
                         .frame(width: 130, height: 26)
                 }
+                if !appState.hotKeyRegistered {
+                    Label("This shortcut is already in use by another app — pick another.",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
                 Toggle("List view", isOn: $settings.useListView)
                 Toggle("Show recently used", isOn: $settings.showRecent)

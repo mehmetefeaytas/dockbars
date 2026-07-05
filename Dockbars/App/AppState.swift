@@ -20,6 +20,8 @@ final class AppState: ObservableObject {
     @Published var selectedStashIndex = 0
     /// Name of the current stash, mirrored for the menu-bar label.
     @Published var currentStashName = ""
+    /// False when the chosen global shortcut couldn't be registered (in use).
+    @Published var hotKeyRegistered = true
     /// True when the pocket is a key window (keyboard + search enabled).
     @Published var panelActivated = false
     /// Live search query (driven by the keyboard monitor).

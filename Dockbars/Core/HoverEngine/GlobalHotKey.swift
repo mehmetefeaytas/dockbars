@@ -10,7 +10,10 @@ final class GlobalHotKey {
 
     var onFire: (() -> Void)?
 
-    func register(keyCode: UInt32 = UInt32(kVK_Space), modifiers: UInt32 = UInt32(optionKey)) {
+    /// Registers the hotkey. Returns false if the OS rejected it — typically
+    /// because another app already owns that combination.
+    @discardableResult
+    func register(keyCode: UInt32 = UInt32(kVK_Space), modifiers: UInt32 = UInt32(optionKey)) -> Bool {
         unregister()
 
         var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard),
@@ -23,7 +26,11 @@ final class GlobalHotKey {
         }, 1, &eventType, Unmanaged.passUnretained(self).toOpaque(), &handlerRef)
 
         let hotKeyID = EventHotKeyID(signature: OSType(0x444B_4253), id: 1) // 'DKBS'
-        RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
+        let status = RegisterEventHotKey(keyCode, modifiers, hotKeyID, GetApplicationEventTarget(), 0, &hotKeyRef)
+        if status != noErr {
+            NSLog("Dockbars ▸ hotkey registration failed (status \(status)) — combo likely in use.")
+        }
+        return status == noErr
     }
 
     func unregister() {

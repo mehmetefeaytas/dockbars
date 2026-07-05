@@ -31,6 +31,7 @@
 "Trigger width" = "Tetik genişliği";
 "Global shortcut" = "Global kısayol";
 "Press keys…" = "Tuşlara basın…";
+"This shortcut is already in use by another app — pick another." = "Bu kısayol başka bir uygulama tarafından kullanılıyor — başka birini seçin.";
 "Launch at login" = "Girişte başlat";
 "List view" = "Liste görünümü";
 "Show recently used" = "Son kullanılanları göster";

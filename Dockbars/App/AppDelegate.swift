@@ -125,6 +125,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { NSApp.terminate(nil) }
             return
         }
+        // Test affordance: open Settings at launch.
+        if ProcessInfo.processInfo.environment["DOCKBARS_OPEN_SETTINGS"] == "1" {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in self?.openSettings() }
+        }
         // Test affordance: open the pocket activated (keyboard/search) at launch.
         if ProcessInfo.processInfo.environment["DOCKBARS_ACTIVATE_ON_LAUNCH"] == "1" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
@@ -451,6 +455,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let mods = appState.settings.hotKeyModifiers
         guard lastHotKey == nil || lastHotKey! != (code, mods) else { return } // avoid churn
         lastHotKey = (code, mods)
-        globalHotKey.register(keyCode: UInt32(code), modifiers: UInt32(mods))
+        let ok = globalHotKey.register(keyCode: UInt32(code), modifiers: UInt32(mods))
+        appState.hotKeyRegistered = ok
     }
 }

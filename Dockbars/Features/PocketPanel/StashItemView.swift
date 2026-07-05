@@ -92,6 +92,10 @@ struct StashItemView: View {
                 .font(.callout)
                 .lineLimit(1)
                 .truncationMode(.middle)
+            if isRunning {
+                Circle().fill(Color.accentColor).frame(width: 6, height: 6)
+                    .shadow(color: Color.accentColor.opacity(0.9), radius: 3)
+            }
             Spacer(minLength: 0)
             if item.isPinned {
                 Image(systemName: "pin.fill").font(.system(size: 9)).foregroundStyle(.orange)
@@ -139,14 +143,19 @@ struct StashItemView: View {
                     .padding(3)
             }
         }
-        .overlay(alignment: .bottom) {
-            if isRunning {
-                Circle()
-                    .fill(Color.accentColor)
-                    .frame(width: 4, height: 4)
-                    .padding(.bottom, 1)
-            }
-        }
+        .overlay(alignment: .bottom) { runningDot }
         .contentShape(Rectangle())
+    }
+
+    /// A clearer "app is running" indicator: a filled accent dot with a soft glow.
+    @ViewBuilder
+    private var runningDot: some View {
+        if isRunning {
+            Circle()
+                .fill(Color.accentColor)
+                .frame(width: 6, height: 6)
+                .shadow(color: Color.accentColor.opacity(0.9), radius: 3)
+                .padding(.bottom, 2)
+        }
     }
 }
