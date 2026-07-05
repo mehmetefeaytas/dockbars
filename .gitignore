@@ -29,3 +29,7 @@ Dockbars.xcodeproj/
 website/.vercel/
 *.png
 !Dockbars/**/*.png
+
+# Playwright MCP
+.playwright-mcp/
+**/.playwright-mcp/

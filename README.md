@@ -119,14 +119,8 @@ xcodebuild -project Dockbars.xcodeproj -scheme Dockbars -destination 'platform=m
 ### Notarize for distribution
 
 For a Gatekeeper-clean build you need a **Developer ID Application** certificate and a
-notarytool profile, then:
-
-```bash
-DEV_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/notarize.sh
-```
-
-`scripts/notarize.sh` archives → exports → notarizes → staples. See the script header for the
-one-time credential setup.
+notarytool profile. `scripts/notarize.sh` then archives → exports → notarizes → staples; see
+the script header for the one-time credential setup.
 
 ## Architecture
 
