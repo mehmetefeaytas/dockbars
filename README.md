@@ -61,8 +61,8 @@ Dockbars is **local-first and offline by design**:
 1. **[Download `Dockbars-x.y.z.dmg`](https://github.com/mehmetefeaytas/dockbars/releases/latest)**
    from the latest release.
 2. Open the DMG and drag **Dockbars** into **Applications**.
-3. Launch it. Because the app is signed but not yet notarized, macOS Gatekeeper shows a
-   warning on first launch — **right-click the app → Open → Open** (only needed once).
+3. Launch it normally — the app is **signed and notarized by Apple**, so it opens with no
+   Gatekeeper warning.
 4. Grant **Accessibility** access when prompted: **System Settings → Privacy & Security →
    Accessibility**. This is required so Dockbars can detect the pointer reaching the Dock edge
    and read the Dock's position. Dockbars requests **no** network access.
