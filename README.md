@@ -1,167 +1,161 @@
+<div align="center">
+
+<img src="Dockbars/Assets.xcassets/AppIcon.appiconset/icon_256.png" width="128" alt="Dockbars icon" />
+
 # Dockbars
 
-**Website:** [dockbars.vercel.app](https://dockbars.vercel.app) (EN · TR · DE · ES)
+**A hidden pocket for your Dock.**
 
-A native macOS hidden **Dock pocket**. Move your pointer to the edge of the screen next
-to the Dock and a panel of your favorite apps and files slides out — a natural extension
-of the Dock, not a replacement for it.
+Push your pointer to the edge of the screen and a Liquid Glass panel slides out —
+your apps, files, and snippets, one flick away. It extends the Dock. It never replaces it.
 
-> Inspired by the "Stash" concept. Codename during development: **Stash++**.
+[**Download the latest DMG**](https://github.com/mehmetefeaytas/dockbars/releases/latest) · [**Website**](https://dockbars.vercel.app)
 
-## Status
+![macOS 15+](https://img.shields.io/badge/macOS-15%2B-black?logo=apple)
+![Swift 5](https://img.shields.io/badge/Swift-5-orange?logo=swift)
+![Local-first](https://img.shields.io/badge/privacy-local--first-blue)
+![No telemetry](https://img.shields.io/badge/telemetry-none-brightgreen)
 
-**Phases 1–4 implemented.** Hidden Dock pocket with hover + menu-bar + global-shortcut
-opening, multiple stashes, search & keyboard navigation, extended item types, themes,
-recents/pins, Quick Peek, multi-monitor, widgets, clipboard history, statistics, JSON
-export/import, and `dockbars://` automation. See [CHANGELOG.md](CHANGELOG.md).
+</div>
 
-### Opening the pocket
+---
 
-- **Hover** the trigger strip (default: bottom-left, beside the Dock). Move into the panel
-  to enable keyboard/search.
-- **Click** the menu-bar icon (right-click for the menu).
-- **Global shortcut** ⌥Space.
-- **URL / CLI**: `open dockbars://open` or `dockbars open`.
+## What is it?
+
+Dockbars is a **native macOS menu-bar app** that adds a hidden, hover-activated pocket next
+to your Dock. Move the pointer to the corner beside the Dock and a translucent panel of your
+favourite apps, files, folders, websites, Shortcuts, scripts, and text snippets slides out.
+Click to open, drag to add or remove, glide away and it closes on its own.
+
+It's designed to feel like a natural part of macOS — and to stay completely on your Mac.
+
+## Features
+
+- **Hidden pocket** that opens on hover, beside the Dock or from a screen edge you choose.
+- **Multiple stashes** — group items into named sets (Work, Dev, Games) and switch with ⌘1–9.
+- **Fuzzy search across every stash** — just start typing; arrow keys + Return to open.
+- **Rich item types** — apps, files, folders, websites, Apple Shortcuts, shell scripts, and
+  text snippets, each opening the right way.
+- **Liquid Glass** panel with System / Light / Dark themes, grid **or** list view, icon sizes 16–128.
+- **Favourites & pins**, **recently used**, and a **running-app indicator**.
+- **Quick Peek** — hover a file for a second to preview it with Quick Look.
+- **Widgets** — clock, battery, recent Downloads; optional **clipboard history**; **usage statistics**.
+- **Multi-monitor** aware and **fullscreen aware** (hover suspends over fullscreen apps).
+- **Global shortcut** (default ⌥Space, fully customizable) and **automation** via a
+  `dockbars://` URL scheme, a CLI wrapper, and AppleScript.
+- **Profiles** — switch appearance/layout presets from the menu bar.
+- **Export / import** your configuration as JSON.
+- **English & Turkish** localization (follows the system language).
+
+## Privacy
+
+Dockbars is **local-first and offline by design**:
+
+- **No network code at all.** Nothing to opt out of, because nothing is ever sent.
+- **No accounts, no telemetry, no analytics, no tracking.**
+- Stashes, clipboard history, and statistics never leave your Mac.
+- Icons are resolved from the system at runtime; nothing is written to disk as image data.
+
+## Install
+
+1. **[Download `Dockbars-x.y.z.dmg`](https://github.com/mehmetefeaytas/dockbars/releases/latest)**
+   from the latest release.
+2. Open the DMG and drag **Dockbars** into **Applications**.
+3. Launch it. Because the app is signed but not yet notarized, macOS Gatekeeper shows a
+   warning on first launch — **right-click the app → Open → Open** (only needed once).
+4. Grant **Accessibility** access when prompted: **System Settings → Privacy & Security →
+   Accessibility**. This is required so Dockbars can detect the pointer reaching the Dock edge
+   and read the Dock's position. Dockbars requests **no** network access.
+
+> Requires **macOS 15 (Sequoia) or later**, on Apple Silicon or Intel.
+
+## Using it
+
+- **Open:** hover the corner beside the Dock, click the menu-bar icon, press **⌥Space**, or run
+  `dockbars://open` / `dockbars open`.
+- **Add items:** drag from Finder/Launchpad/Dock into the panel, or use the header **+** menu
+  (Files / URL / Shortcut / Script / Snippet).
+- **Remove:** drag an item to the header trash, drag it out of the panel, or right-click → Remove.
+- **Reorder:** drag an item onto another within a stash.
+- **Search / keyboard:** move into the open panel, then type to fuzzy-search; ↑↓ to move,
+  Return to open, Esc to clear/close, ⌘1–9 to switch stashes.
+- **Right-click the menu-bar icon** for Settings, Profiles, Tutorial, and Quit.
 
 ### Automation
 
-`dockbars://` URL scheme:
-
-```
-dockbars://open              # open the pocket
-dockbars://open?stash=Work   # select "Work" and open
-dockbars://toggle            # toggle
-```
-
-CLI wrapper (`scripts/dockbars`, install to `/usr/local/bin`):
-
 ```bash
+# URL scheme
+open "dockbars://open"              # open the pocket
+open "dockbars://open?stash=Work"   # select "Work" and open
+open "dockbars://toggle"            # toggle
+
+# CLI (install scripts/dockbars into your PATH)
 dockbars open
 dockbars open Work
 dockbars toggle
 ```
 
-AppleScript (via the URL scheme):
-
 ```applescript
+-- AppleScript, via the URL scheme
 do shell script "open 'dockbars://open?stash=Work'"
 ```
 
-Auto-update via **Sparkle** is planned; the appcast URL is a placeholder until then.
+## Build from source
 
-## Privacy
-
-Dockbars is **local-first and offline**:
-
-- **No network access.** (The only future exception will be Sparkle auto-updates in Phase 4, behind a clearly labeled setting.)
-- **No telemetry, no analytics, no tracking.**
-- All data — your stashes, items, and settings — stays on your Mac.
-- Icons are resolved at runtime from the system; nothing is written to disk as image data.
-
-## Requirements
-
-- macOS 15 (Sequoia) or later. Tested against the macOS 26 (Tahoe) SDK.
-- Xcode 26+ / Swift 5.10+ toolchain.
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) to generate the project (`brew install xcodegen`).
-
-## Accessibility permission
-
-Dockbars needs **Accessibility** access to watch for the pointer reaching the Dock edge
-and to read the Dock's position. This is why **App Sandbox is intentionally disabled** —
-global mouse monitoring and Dock inspection are incompatible with the sandbox. Dockbars
-requests no network entitlement and keeps Hardened Runtime enabled for notarization.
-
-On first launch you'll be prompted; grant access in
-**System Settings → Privacy & Security → Accessibility**.
-
-## Build & run
+Requires Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`).
 
 ```bash
-# Generate the Xcode project from project.yml
 xcodegen generate
-
-# Build
 xcodebuild -project Dockbars.xcodeproj -scheme Dockbars -configuration Debug build
-
-# Run the tests
 xcodebuild -project Dockbars.xcodeproj -scheme Dockbars -destination 'platform=macOS' test
 ```
 
-## Distribution (signing & notarization)
+### Package a DMG
 
-Hardened Runtime is enabled and the entitlements grant no network access, so the app is
-ready for **Developer ID** signing and notarization. This step requires **your** Apple
-credentials (not included in the repo):
+```bash
+./scripts/make-dmg.sh          # signs with your Apple Development identity + builds the DMG
+```
 
-1. A **Developer ID Application** certificate in your keychain.
-2. A notarytool profile (one-time):
-   ```bash
-   xcrun notarytool store-credentials dockbars-notary \
-     --apple-id "you@example.com" --team-id TEAMID --password "app-specific-password"
-   ```
-3. Build, sign, notarize and staple:
-   ```bash
-   DEV_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/notarize.sh
-   ```
+### Notarize for distribution
 
-`scripts/notarize.sh` + `scripts/ExportOptions.plist` automate archive → export → notarize →
-staple. Until you notarize your own build, the app is ad-hoc signed (Gatekeeper will warn,
-and the Accessibility grant resets on each rebuild).
+For a Gatekeeper-clean build you need a **Developer ID Application** certificate and a
+notarytool profile, then:
 
-## Auto-update (Sparkle) — planned
+```bash
+DEV_ID="Developer ID Application: Your Name (TEAMID)" ./scripts/notarize.sh
+```
 
-Sparkle is not yet integrated. When it is, it will need: the Sparkle SPM package, an EdDSA
-key pair (`generate_keys`), an `SUFeedURL` in Info.plist pointing at your appcast, and a
-hosted `appcast.xml`. All update checks would be opt-in and are the app's only network use.
-
-Or open `Dockbars.xcodeproj` in Xcode and run the **Dockbars** scheme.
+`scripts/notarize.sh` archives → exports → notarizes → staples. See the script header for the
+one-time credential setup.
 
 ## Architecture
 
-MVVM. `AppState` (an `ObservableObject`) is the single source of truth; the AppKit layer
-bridges into SwiftUI with `NSHostingView`.
+MVVM with an AppKit coordinator bridging into SwiftUI via `NSHostingView`. `AppState` is the
+single source of truth.
 
 ```
 Dockbars/
 ├── App/         main, AppDelegate (coordinator), AppState
 ├── Core/
 │   ├── DockObserver/    Dock position/size/autohide detection + pure geometry
-│   ├── HoverEngine/     global mouse monitor + debounced open/close
-│   ├── PanelController/ NSPanel lifecycle, positioning, slide+fade animation
-│   └── Persistence/     SwiftData models (Stash, StashItem) + SettingsStore
-├── Features/
-│   ├── PocketPanel/     SwiftUI panel content
-│   ├── Settings/        preferences window
-│   └── MenuBar/         status item + onboarding
-├── Utilities/
-└── Tests/               DockGeometry + HoverDebouncer unit tests
+│   ├── HoverEngine/     global mouse monitor, hotkey, running/fullscreen/clipboard monitors
+│   ├── PanelController/ non-activating NSPanel lifecycle + spring animation
+│   └── Persistence/     SwiftData models, settings, profiles, JSON import/export
+├── Features/    PocketPanel · Settings · MenuBar · Onboarding
+├── Utilities/   icons, launcher, fuzzy match, shortcuts, layout, localization
+├── Resources/   en.lproj / tr.lproj
+└── Tests/       DockGeometry · HoverDebouncer · FuzzyMatch · PanelLayout · ConfigCodec
 ```
 
-Key technical decisions:
-
-- **Panel:** `NSPanel` subclass — `nonactivatingPanel`, borderless, `level = .statusBar`,
-  `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]`. Opening the pocket never
-  steals focus from the active app.
-- **Hover:** `NSEvent` global + local `.mouseMoved` monitors. The hot path does a single
-  cached rect test; the close delay is realized with one cancellable work item (no polling),
-  keeping idle CPU near zero.
-- **Dock detection:** reads `com.apple.dock` (`orientation`/`tilesize`/`autohide`) plus
-  `NSScreen` frames, and listens to `com.apple.dock.prefchanged`.
-- **Persistence:** SwiftData for stashes/items; UserDefaults for lightweight settings.
-- **Menu bar only:** `NSStatusItem`, `LSUIElement = true`, no Dock icon.
-- **Launch at login:** `SMAppService.mainApp`.
-- **Dependencies:** zero third-party (Sparkle deferred to Phase 4).
+Key decisions: a non-activating borderless `NSPanel` that never steals focus; an
+allocation-free hover hot path (a single cached rect test — idle CPU ≈ 0%, RAM in the tens of
+MB); **App Sandbox intentionally disabled** because global mouse monitoring and Dock
+inspection require Accessibility; zero third-party dependencies.
 
 ## Roadmap
 
-- **Phase 1 — MVP:** hidden pocket, hover detection, smart Dock detection, single 12-slot
-  stash, drag-and-drop, click-to-open, animation, menu bar, settings, onboarding.
-- **Phase 2:** multiple named stashes, extended item types, search, keyboard nav, full
-  context menu, running-apps section, themes.
-- **Phase 3:** recently used, favorites/pin, Quick Peek, global shortcut, multi-monitor,
-  fullscreen awareness, profiles, list view.
-- **Phase 4:** widgets, clipboard history, automation (URL scheme / AppleScript / CLI),
-  export/import + iCloud sync, stats, Sparkle updates, accessibility pass.
+Phases 1–4 are implemented. Planned next: **Sparkle** auto-update (opt-in; would be the app's
+only network use) and a fuller String Catalog localization pass.
 
 ## License
 
